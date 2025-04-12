@@ -10,17 +10,12 @@
     - [1. Clone o repositório](#1-clone-o-repositório)
     - [2. Inicialize o Git Flow](#2-inicialize-o-git-flow)
     - [3. Instale as dependências](#3-instale-as-dependências)
-    - [4. Configure as Variáveis de Ambiente](#4-configure-as-variáveis-de-ambiente)
-    - [5. Configure o Banco de Dados (Opcional)](#5-configure-o-banco-de-dados-opcional)
-    - [6. Rode a Aplicação](#6-rode-a-aplicação)
-  - [Rodando a Aplicação](#rodando-a-aplicação-modos)
-  - [Executando Testes](#executando-testes)
+    - [4. Rode a Aplicação (Desenvolvimento)](#4-rode-a-aplicação-desenvolvimento)
   - [Documentação da API](#documentação-da-api)
   - [Fluxo de Trabalho com Git Flow](#fluxo-de-trabalho-com-git-flow)
     - [1. Criar uma nova feature](#1-criar-uma-nova-feature)
     - [2. Trabalhar na feature](#2-trabalhar-na-feature)
     - [3. Finalizar a feature](#3-finalizar-a-feature)
-  - [Tecnologias Utilizadas](#tecnologias-utilizadas)
 
 
 [Voltar ao README principal](https://github.com/HortaShop-PS)
