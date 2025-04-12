@@ -1,98 +1,111 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+<div align="center">
+  <img src="/img/logo/hortaShop.png" alt="logo" style="height: 5cm;">
+</div>
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+- Índice
+  - [Pré-requisitos](#pré-requisitos)
+  - [Configuração do Projeto](#configuração-do-projeto)
+    - [1. Clone o repositório](#1-clone-o-repositório)
+    - [2. Inicialize o Git Flow](#2-inicialize-o-git-flow)
+    - [3. Instale as dependências](#3-instale-as-dependências)
+    - [4. Configure as Variáveis de Ambiente](#4-configure-as-variáveis-de-ambiente)
+    - [5. Configure o Banco de Dados (Opcional)](#5-configure-o-banco-de-dados-opcional)
+    - [6. Rode a Aplicação](#6-rode-a-aplicação)
+  - [Rodando a Aplicação](#rodando-a-aplicação-modos)
+  - [Executando Testes](#executando-testes)
+  - [Documentação da API](#documentação-da-api)
+  - [Fluxo de Trabalho com Git Flow](#fluxo-de-trabalho-com-git-flow)
+    - [1. Criar uma nova feature](#1-criar-uma-nova-feature)
+    - [2. Trabalhar na feature](#2-trabalhar-na-feature)
+    - [3. Finalizar a feature](#3-finalizar-a-feature)
+  - [Tecnologias Utilizadas](#tecnologias-utilizadas)
 
-## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+[Voltar ao README principal](https://github.com/HortaShop-PS)
 
-## Project setup
 
-```bash
-$ npm install
-```
+Este é o repositório do BackEnd do projeto Hortashop, desenvolvido com [NestJS](https://nestjs.com/), [TypeScript](https://www.typescriptlang.org/) e [Node.js](https://nodejs.org/). Este guia irá ajudar a configurar o ambiente, rodar o projeto e seguir o fluxo de trabalho com Git Flow. Este backend fornece as APIs necessárias para o funcionamento do [Frontend HortaShop](https://github.com/HortaShop-PS/FrontEnd).
 
-## Compile and run the project
+## Pré-requisitos
 
-```bash
-# development
-$ npm run start
+Antes de começar, certifique-se de ter os seguintes itens instalados:
 
-# watch mode
-$ npm run start:dev
+1.  **Git**: [Instalar Git](https://git-scm.com/)
+2.  **Node.js**: [Instalar Node.js](https://nodejs.org/) 
 
-# production mode
-$ npm run start:prod
-```
+## Configuração do Projeto
 
-## Run tests
+### 1. Clone o repositório
+
+Clone o repositório para sua máquina local:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+git clone https://github.com/HortaShop-PS/BackEnd.git
 ```
 
-## Deployment
+### 2. Inicialize o Git Flow
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Inicialize o Git Flow no repositório (se for usar este fluxo):
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+git flow init
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Durante a inicialização, você pode aceitar as configurações padrão pressionando `Enter` para cada pergunta.
 
-## Resources
+### 3. Instale as dependências
 
-Check out a few resources that may come in handy when working with NestJS:
+Instale as dependências do projeto usando NPM ou Yarn:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+npm install
+```
 
-## Support
+### 4. Rode a Aplicação (Desenvolvimento)
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Inicie o servidor de desenvolvimento do NestJS:
 
-## Stay in touch
+```bash
+npm run start:dev
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Documentação da API
 
-## License
+Se o projeto utiliza Swagger (comum em NestJS), a documentação da API estará disponível automaticamente após iniciar a aplicação. Acesse pelo navegador:
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+`http://localhost:[PORTA]/api`
+
+*(Substitua `[PORTA]` pela porta configurada, geralmente 3000)*
+
+## Fluxo de Trabalho com Git Flow
+
+### 1. Criar uma nova feature
+
+Para começar a trabalhar em uma nova funcionalidade, crie uma branch de feature:
+
+```bash
+git flow feature start nome-da-feature
+```
+
+Isso criará uma nova branch baseada na branch `develop`.
+
+### 2. Trabalhar na feature
+
+Implemente as alterações necessárias no código. Lembre-se de fazer commits regularmente:
+
+```bash
+git add .
+git commit -m "Descrição do commit"
+```
+
+### 3. Finalizar a feature
+
+Quando terminar de implementar e testar a funcionalidade, finalize a branch de feature:
+
+```bash
+git flow feature finish nome-da-feature
+```
+
+Isso fará o merge da branch de feature na branch `develop` e deletará a branch de feature local.
