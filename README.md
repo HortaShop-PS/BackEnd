@@ -76,7 +76,17 @@ Se o projeto utiliza Swagger (comum em NestJS), a documentação da API estará 
 
 ## Fluxo de Trabalho com Git Flow
 
-### 1. Criar uma nova feature
+### 1. Pull para verificar atualizações
+
+Antes de começar a trabalhar em uma nova funcionalidade, sempre faça um pull das últimas alterações da branch `develop`:
+
+```bash
+git checkout develop
+git pull origin develop
+```
+Isso garante que você esteja trabalhando com a versão mais recente do código.
+
+### 2. Criar uma nova feature
 
 Para começar a trabalhar em uma nova funcionalidade, crie uma branch de feature:
 
@@ -86,7 +96,7 @@ git flow feature start nome-da-feature
 
 Isso criará uma nova branch baseada na branch `develop`.
 
-### 2. Trabalhar na feature
+### 3. Trabalhar na feature
 
 Implemente as alterações necessárias no código. Lembre-se de fazer commits regularmente:
 
@@ -95,7 +105,7 @@ git add .
 git commit -m "Descrição do commit"
 ```
 
-### 3. Finalizar a feature
+### 4. Finalizar a feature
 
 Quando terminar de implementar e testar a funcionalidade, finalize a branch de feature:
 
