@@ -18,9 +18,9 @@ import { UsersModule } from "./users/users.module"
         username: configService.get("DB_USER"),
         password: configService.get("DB_PASSWORD"),
         database: configService.get("DB_NAME"),
-        autoLoadEntities: true, // do remoto
+        autoLoadEntities: true,
         synchronize: true,
-        logging: true, // do remoto
+        logging: true,
         ssl: {
           rejectUnauthorized: false,
         },
