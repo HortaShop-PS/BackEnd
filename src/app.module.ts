@@ -1,32 +1,35 @@
-import { Module } from "@nestjs/common"
-import { TypeOrmModule } from "@nestjs/typeorm"
-import { ConfigModule, ConfigService } from "@nestjs/config"
-import { UsersModule } from "./users/users.module"
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { UsersModule } from './users/users.module';
+import { ProductsModule } from './products/product.module'; 
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+    /* Carrega .env e torna ConfigService global */
+    ConfigModule.forRoot({ isGlobal: true }),
+
+    /* Conexão com PostgreSQL */
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: "postgres",
-        host: configService.get("DB_HOST"),
-        port: configService.get<number>("DB_PORT"),
-        username: configService.get("DB_USER"),
-        password: configService.get("DB_PASSWORD"),
-        database: configService.get("DB_NAME"),
+      useFactory: (config: ConfigService) => ({
+        type: 'postgres',
+        host: config.get('DB_HOST'),
+        port: config.get<number>('DB_PORT'),
+        username: config.get('DB_USER'),
+        password: config.get('DB_PASSWORD'),
+        database: config.get('DB_NAME'),
         autoLoadEntities: true,
-        synchronize: true,
+        synchronize: true,      // cuidado em produção
         logging: true,
-        ssl: {
-          rejectUnauthorized: false,
-        },
+        ssl: { rejectUnauthorized: false },
       }),
     }),
+
     UsersModule,
+    ProductsModule,   
   ],
 })
 export class AppModule {}
