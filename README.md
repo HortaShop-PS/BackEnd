@@ -13,9 +13,10 @@
     - [4. Rode a Aplicação (Desenvolvimento)](#4-rode-a-aplicação-desenvolvimento)
   - [Documentação da API](#documentação-da-api)
   - [Fluxo de Trabalho com Git Flow](#fluxo-de-trabalho-com-git-flow)
-    - [1. Criar uma nova feature](#1-criar-uma-nova-feature)
-    - [2. Trabalhar na feature](#2-trabalhar-na-feature)
-    - [3. Finalizar a feature](#3-finalizar-a-feature)
+    - [1. Pull para verificar atualizações](#1-pull-para-verificar-atualizações)
+    - [2. Criar uma nova feature](#2-criar-uma-nova-feature)
+    - [3. Trabalhar na feature](#3-trabalhar-na-feature)
+    - [4. Pull Request da feature](#4-pull-request-da-feature)
 
 
 [Voltar ao README principal](https://github.com/HortaShop-PS)
@@ -105,12 +106,6 @@ git add .
 git commit -m "Descrição do commit"
 ```
 
-### 4. Finalizar a feature
+### 4. Pull Request da feature
 
-Quando terminar de implementar e testar a funcionalidade, finalize a branch de feature:
-
-```bash
-git flow feature finish nome-da-feature
-```
-
-Isso fará o merge da branch de feature na branch `develop` e deletará a branch de feature local.
+Quando você terminar de implementar e testar a funcionalidade, faça um pull request (PR) para a branch `develop`. Isso pode ser feito através da interface do GitHub.

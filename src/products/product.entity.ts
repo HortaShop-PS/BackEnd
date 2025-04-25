@@ -12,14 +12,14 @@ export class Product {
   price: number;
 
   @Column()
-  unit: string;          // ex.: "kg", "dúzia"
+  unit: string; // ex.: "kg", "dúzia"
 
   @Column()
-  imageUrl: string;      // URL da foto
+  imageUrl: string; // URL da foto
 
   @Column({ default: false })
-  isFeatured: boolean;   // aparece na Home?
+  isFeatured: boolean; // aparece na Home?
 
   @Column({ default: false })
-  isNew: boolean;        // selo “Novo”
+  isNew: boolean; // selo “Novo”
 }
