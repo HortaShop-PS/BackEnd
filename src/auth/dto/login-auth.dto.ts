@@ -7,8 +7,5 @@ export class LoginAuthDto {
 
   @IsNotEmpty({ message: 'A senha não pode estar vazia' })
   @IsString()
-  // Você pode adicionar @MinLength se quiser validar o tamanho mínimo aqui também,
-  // embora a validação principal ocorra na comparação do hash.
-  // @MinLength(6, { message: 'A senha deve ter no mínimo 6 caracteres' })
   password: string;
 }
