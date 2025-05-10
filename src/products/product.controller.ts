@@ -21,6 +21,46 @@ export class ProductController {
       unit: p.unit,
       imageUrl: p.imageUrl,
       isNew: p.isNew,
+      category: p.category,
+      isOrganic: p.isOrganic,
+      origin: p.origin
+    }));
+  }
+
+  @Get('search')
+  async search(
+    @Query('name') name?: string,
+    @Query('minPrice') minPrice?: number,
+    @Query('maxPrice') maxPrice?: number,
+    @Query('isFeatured') isFeatured?: boolean,
+    @Query('isNew') isNew?: boolean,
+    @Query('limit') limit?: number,
+    @Query('category') category?: string,
+    @Query('isOrganic') isOrganic?: boolean,
+    @Query('origin') origin?: string,
+  ): Promise<ProductResponseDto[]> {
+    const products = await this.service.advancedSearch({
+      name,
+      minPrice: minPrice ? Number(minPrice) : undefined,
+      maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      isFeatured: isFeatured ? isFeatured === true : undefined,
+      isNew: isNew ? isNew === true : undefined,
+      limit: limit ? Number(limit) : undefined,
+      category,
+      isOrganic: isOrganic ? isOrganic === true : undefined,
+      origin
+    });
+
+    return products.map((p) => ({
+      id: p.id,
+      name: p.name,
+      price: Number(p.price),
+      unit: p.unit,
+      imageUrl: p.imageUrl,
+      isNew: p.isNew,
+      category: p.category,
+      isOrganic: p.isOrganic,
+      origin: p.origin
     }));
   }
 
@@ -35,6 +75,9 @@ export class ProductController {
       unit: product.unit,
       imageUrl: product.imageUrl,
       isNew: product.isNew,
+      category: product.category,
+      isOrganic: product.isOrganic,
+      origin: product.origin
     };
   }
 }

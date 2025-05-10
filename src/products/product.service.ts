@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Like, Between, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
 import { Product } from './product.entity';
 
 @Injectable()
@@ -30,5 +30,76 @@ export class ProductService {
       console.error('Erro ao buscar produto:', error);
       throw error;
     }
+  }
+
+  async advancedSearch(params: {
+    name?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    isFeatured?: boolean;
+    isNew?: boolean;
+    limit?: number;
+    category?: string;
+    isOrganic?: boolean;
+    harvestSeason?: string;
+    origin?: string;
+  }): Promise<Product[]> {
+    const {
+      name,
+      minPrice,
+      maxPrice,
+      isFeatured,
+      isNew,
+      limit,
+      category,
+      isOrganic,
+      harvestSeason,
+      origin
+    } = params;
+    
+    const query = this.repo.createQueryBuilder('product');
+
+    // Filtros existentes
+    if (name) {
+      query.andWhere({ name: Like(`%${name}%`) });
+    }
+
+    if (minPrice !== undefined && maxPrice !== undefined) {
+      query.andWhere({ price: Between(minPrice, maxPrice) });
+    } else if (minPrice !== undefined) {
+      query.andWhere({ price: MoreThanOrEqual(minPrice) });
+    } else if (maxPrice !== undefined) {
+      query.andWhere({ price: LessThanOrEqual(maxPrice) });
+    }
+
+    if (isFeatured !== undefined) {
+      query.andWhere({ isFeatured });
+    }
+
+    if (isNew !== undefined) {
+      query.andWhere({ isNew });
+    }
+
+    if (category) {
+      query.andWhere({ category });
+    }
+
+    if (isOrganic !== undefined) {
+      query.andWhere({ isOrganic });
+    }
+    
+    if (harvestSeason) {
+      query.andWhere({ harvestSeason });
+    }
+    
+    if (origin) {
+      query.andWhere({ origin });
+    }
+
+    if (limit) {
+      query.take(limit);
+    }
+
+    return query.getMany();
   }
 }

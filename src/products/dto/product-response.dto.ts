@@ -5,4 +5,6 @@ export class ProductResponseDto {
   unit: string;
   imageUrl: string;
   isNew: boolean;
+  category?: string;
+  isOrganic: boolean;
 }
