@@ -22,4 +22,16 @@ export class Product {
 
   @Column({ default: false })
   isNew: boolean;
+  
+  @Column({ nullable: true })
+  category?: string;
+
+  @Column({ default: false })
+  isOrganic: boolean;
+
+  @Column({ nullable: true })
+  harvestSeason?: string;
+
+  @Column({ nullable: true })
+  origin?: string;
 }
