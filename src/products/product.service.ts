@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, Between, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
 import { Product } from './product.entity';
@@ -17,6 +17,21 @@ export class ProductService {
     });
   }
 
+  async findById(id: string): Promise<Product> {
+    try {
+      const product = await this.repo.findOneBy({ id });
+      
+      if (!product) {
+        throw new NotFoundException(`Produto com ID ${id} não encontrado`);
+      }
+      
+      return product;
+    } catch (error) {
+      console.error('Erro ao buscar produto:', error);
+      throw error;
+    }
+  }
+
   async advancedSearch(params: {
     name?: string;
     minPrice?: number;
@@ -24,17 +39,17 @@ export class ProductService {
     isFeatured?: boolean;
     isNew?: boolean;
     limit?: number;
-    category?: string;          
-    isOrganic?: boolean;        
-    harvestSeason?: string;    
-    origin?: string;          
+    category?: string;
+    isOrganic?: boolean;
+    harvestSeason?: string;
+    origin?: string;
   }): Promise<Product[]> {
-    const { 
-      name, 
-      minPrice, 
-      maxPrice, 
-      isFeatured, 
-      isNew, 
+    const {
+      name,
+      minPrice,
+      maxPrice,
+      isFeatured,
+      isNew,
       limit,
       category,
       isOrganic,
@@ -71,6 +86,14 @@ export class ProductService {
 
     if (isOrganic !== undefined) {
       query.andWhere({ isOrganic });
+    }
+    
+    if (harvestSeason) {
+      query.andWhere({ harvestSeason });
+    }
+    
+    if (origin) {
+      query.andWhere({ origin });
     }
 
     if (limit) {

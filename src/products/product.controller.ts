@@ -1,6 +1,7 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, Param } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductResponseDto } from './dto/product-response.dto';
+import { ParseUUIDPipe } from '@nestjs/common';
 
 @Controller('products')
 export class ProductController {
@@ -46,7 +47,8 @@ export class ProductController {
       isNew: isNew ? isNew === true : undefined,
       limit: limit ? Number(limit) : undefined,
       category,
-      isOrganic: isOrganic ? isOrganic === true : undefined
+      isOrganic: isOrganic ? isOrganic === true : undefined,
+      origin
     });
 
     return products.map((p) => ({
@@ -57,7 +59,24 @@ export class ProductController {
       imageUrl: p.imageUrl,
       isNew: p.isNew,
       category: p.category,
-      isOrganic: p.isOrganic
+      isOrganic: p.isOrganic,
+      origin: p.origin
     }));
+  }
+
+  @Get(':id')
+  async getProductById(@Param('id', ParseUUIDPipe) id: string): Promise<ProductResponseDto> {
+    const product = await this.service.findById(id);
+    
+    return {
+      id: product.id,
+      name: product.name,
+      price: Number(product.price),
+      unit: product.unit,
+      imageUrl: product.imageUrl,
+      isNew: product.isNew,
+      category: product.category,
+      isOrganic: product.isOrganic
+    };
   }
 }
