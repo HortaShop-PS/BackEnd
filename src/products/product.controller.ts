@@ -76,8 +76,7 @@ export class ProductController {
       imageUrl: product.imageUrl,
       isNew: product.isNew,
       category: product.category,
-      isOrganic: product.isOrganic,
-      origin: product.origin
+      isOrganic: product.isOrganic
     };
   }
 }

@@ -43,6 +43,8 @@ export class FavoritesController {
       unit: favorite.product.unit,
       imageUrl: favorite.product.imageUrl,
       isNew: favorite.product.isNew,
+      isOrganic: favorite.product.isOrganic,
+      category: favorite.product.category
     }));
 
     return { products };
