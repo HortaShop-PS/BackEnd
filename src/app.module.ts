@@ -5,6 +5,7 @@ import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/product.module';
 import { AuthModule } from './auth/auth.module';
 import { ProducerModule } from './dto/producer/producer.module';
+import { FavoritesModule } from './favorites/favorites.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ProducerModule } from './dto/producer/producer.module';
     ProductsModule,
     AuthModule,
     ProducerModule,
+    FavoritesModule,
   ],
 })
 export class AppModule {}
