@@ -2,6 +2,8 @@ import { Controller, Get, Query, Param } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductResponseDto } from './dto/product-response.dto';
 import { ParseUUIDPipe } from '@nestjs/common';
+import { Body, Post } from '@nestjs/common';
+import { CreateProductDto } from './dto/create-product.dto';
 
 @Controller('products')
 export class ProductController {
@@ -78,5 +80,11 @@ export class ProductController {
       category: product.category,
       isOrganic: product.isOrganic
     };
+  }
+
+  @Post()
+  async createProduct(@Body() createProductDto: CreateProductDto) {
+    const product = await this.service.createProduct(createProductDto);
+    return product;
   }
 }

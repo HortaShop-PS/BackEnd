@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, Between, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
 import { Product } from './product.entity';
+import { CreateProductDto } from './dto/create-product.dto';
 
 @Injectable()
 export class ProductService {
@@ -101,5 +102,11 @@ export class ProductService {
     }
 
     return query.getMany();
+  }
+
+  async createProduct(createProductDto: CreateProductDto) {
+    const product = this.repo.create(createProductDto);
+    await this.repo.save(product);
+    return product;
   }
 }
