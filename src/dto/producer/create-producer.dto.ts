@@ -1,16 +1,39 @@
-import { IsEmail, IsOptional, IsPhoneNumber, IsNotEmpty, MinLength, IsString } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MinLength, IsNotEmpty } from 'class-validator';
 
 export class CreateProducerDto {
+  @IsString()
+  @IsNotEmpty({ message: 'O nome não pode estar vazio' })
+  name: string;
+
+  @IsEmail({}, { message: 'Formato de email inválido' })
   @IsOptional()
-  @IsEmail({}, { message: 'Formato de e-mail inválido.' })
   email?: string;
 
+  @IsString()
   @IsOptional()
-  @IsPhoneNumber('BR', { message: 'Número de telefone inválido.' })
   phoneNumber?: string;
 
-  @IsNotEmpty({ message: 'A senha não pode estar vazia.' })
-  @MinLength(6, { message: 'A senha deve ter no mínimo 6 caracteres.' })
-  password!: string;
+  @IsString()
+  @MinLength(6)
+  password: string;
 
+  @IsString()
+  @IsOptional()
+  cnpj?: string;
+
+  @IsString()
+  @IsOptional()
+  farmName?: string;
+
+  @IsString()
+  @IsOptional()
+  address?: string;
+
+  @IsString()
+  @IsOptional()
+  city?: string;
+
+  @IsString()
+  @IsOptional()
+  state?: string;
 }
