@@ -30,6 +30,7 @@ export class ProducerService {
         email: createProducerDto.email,
         password: hashedPassword,
         phone: createProducerDto.phoneNumber,
+        userType: 'producer',
       });
 
       const producer = this.producerRepository.create({
@@ -63,7 +64,10 @@ export class ProducerService {
   }
 
   async findByUserId(userId: number): Promise<Producer | null> {
-    return this.producerRepository.findOne({ where: { userId } });
+    return this.producerRepository.findOne({ 
+      where: { userId },
+      select: ['id', 'userId', 'farmName', 'cnpj'] 
+    });
   }
 
   async findAll(): Promise<Producer[]> {

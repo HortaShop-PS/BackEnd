@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, Between, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
 import { Product } from './product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
+import { Producer } from 'src/entities/producer.entity';
 
 @Injectable()
 export class ProductService {
@@ -104,9 +105,58 @@ export class ProductService {
     return query.getMany();
   }
 
-  async createProduct(createProductDto: CreateProductDto) {
-    const product = this.repo.create(createProductDto);
-    await this.repo.save(product);
-    return product;
+
+async createProduct(createProductDto: CreateProductDto & { producerId: number }) {
+  const producerRepo = this.repo.manager.getRepository('producers');
+  const producer = await producerRepo.findOne({
+    where: { userId: createProductDto.producerId }
+  });
+
+  if (!producer) {
+    throw new NotFoundException(`Produtor com userId ${createProductDto.producerId} não encontrado`);
   }
+
+  const product = this.repo.create({
+      ...createProductDto,
+      producer: { id: producer.id }
+  });
+  await this.repo.save(product);
+  return product;
+}
+
+async getProductsByProducerId(producerId: number): Promise<Product[]> {
+  try {
+    const producerRepo = this.repo.manager.getRepository(Producer);
+    const producer = await producerRepo.findOne({
+      where: { userId: producerId }
+    });
+
+    if (!producer) {
+      throw new NotFoundException(`Produtor com userId ${producerId} não encontrado`);
+    }
+
+   
+    return this.repo.find({
+      where: { 
+        producer: { id: producer.id } 
+      },
+      order: { createdAt: 'DESC' } as any
+    });
+  } catch (error) {
+    console.error('Erro ao buscar produtos do produtor:', error);
+    throw error;
+  }
+}
+
+async getAllProducts(): Promise<Product[]> {
+  try {
+    return this.repo.find({
+      order: { createdAt: 'DESC' },
+      relations: ['producer']
+    });
+  } catch (error) {
+    console.error('Erro ao buscar todos os produtos:', error);
+    throw error;
+  }
+}
 }

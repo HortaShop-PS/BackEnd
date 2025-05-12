@@ -33,4 +33,5 @@ export class Producer {
 
   @Column()
   userId: number;
+  products: any;
 }

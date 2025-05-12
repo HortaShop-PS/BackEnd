@@ -14,7 +14,17 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req: { user: UserResponseDto }) {
-    return this.authService.login(req.user);
+    // Adicionar log para verificar se o userType está sendo retornado
+    console.log('Usuário autenticado:', {
+      id: req.user.id,
+      userType: req.user.userType
+    });
+    
+    return this.authService.login({
+      ...req.user,
+      // Garantir que userType está sendo passado corretamente
+      userType: req.user.userType || 'consumer'
+    });
   }
 
   @Post('register')
