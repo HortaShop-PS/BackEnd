@@ -26,7 +26,6 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsString()
-  @IsOptional()
   @IsEnum(CategoryEnum, { message: 'Categoria inválida. Escolha uma das opções válidas.' })
   category?: CategoryEnum;
 
@@ -40,6 +39,7 @@ export class CreateProductDto {
   @IsNumber()
   quantity?: number;
 
-  // @IsUrl()
-  //imageUrl: string;
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
 }

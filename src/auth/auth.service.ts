@@ -18,7 +18,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   async validateUser(
     email: string,
@@ -33,11 +33,17 @@ export class AuthService {
   }
 
   async login(user: UserResponseDto) {
-    const payload = { email: user.email, sub: user.id };
-    return {
-      access_token: this.jwtService.sign(payload),
+    const payload = { 
+        email: user.email,
+        sub: user.id,
+        userType: user.userType, 
+        producerId: user.producer?.id || null 
     };
-  }
+    return {
+        access_token: this.jwtService.sign(payload),
+        userType: user.userType,
+    };
+}
 
   async register(registerAuthDto: RegisterAuthDto): Promise<UserResponseDto> {
     try {
@@ -48,6 +54,7 @@ export class AuthService {
         email: registerAuthDto.email,
         password: hashedPassword,
         phone: registerAuthDto.phoneNumber,
+        userType: 'consumer',
       });
 
       const { password, ...result } = newUser;
@@ -69,6 +76,7 @@ export class AuthService {
         const newUser = await this.usersService.create({
           email: oauthUser.email,
           name: oauthUser.name,
+          userType: 'consumer',
         });
         user = newUser;
       }

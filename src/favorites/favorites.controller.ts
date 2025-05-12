@@ -44,7 +44,8 @@ export class FavoritesController {
       imageUrl: favorite.product.imageUrl,
       isNew: favorite.product.isNew,
       isOrganic: favorite.product.isOrganic,
-      category: favorite.product.category
+      category: favorite.product.category,
+      isFeatured: favorite.product.isFeatured // Add this line
     }));
 
     return { products };
