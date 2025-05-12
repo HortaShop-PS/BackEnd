@@ -44,6 +44,12 @@ export class UserResponseDto {
   name: string;
   email: string;
   phone?: string;
+  userType: string;
+  producer?: {
+      id?: number;
+      farmName?: string;
+      cnpj?: string;
+  };
   createdAt: Date;
   updatedAt: Date;
 }

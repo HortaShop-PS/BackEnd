@@ -3,6 +3,11 @@ export class ProductResponseDto {
   name: string;
   price: number;
   unit: string;
-  imageUrl: string;
+  imageUrl?: string;
   isNew: boolean;
+  isFeatured: boolean;
+  category?: string;
+  isOrganic: boolean;
+  origin?: string;
+  description?: string;
 }

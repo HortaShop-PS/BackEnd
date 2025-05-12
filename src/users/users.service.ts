@@ -13,22 +13,29 @@ export class UsersService {
   ) {}
 
   private mapToDto(user: User): UserResponseDto {
-    const { password, ...userDto } = user;
-    return userDto as UserResponseDto;
-  }
+    const { password, producer, ...userDto } = user;
+    return {
+        ...userDto,
+        producer: producer ? { id: producer.id } : undefined
+    } as UserResponseDto;
+}
 
   async findAll(): Promise<UserResponseDto[]> {
     const users = await this.usersRepository.find();
     return users.map(user => this.mapToDto(user));
   }
 
-  async findOne(id: number): Promise<UserResponseDto> {
-    const user = await this.usersRepository.findOne({ where: { id } });
-    if (!user) {
+async findOne(id: number, relations: string[] = ['producer']): Promise<UserResponseDto> {
+  const user = await this.usersRepository.findOne({ 
+      where: { id },
+      relations: relations 
+  });
+  if (!user) {
       throw new NotFoundException(`Usuário com ID ${id} não encontrado`);
-    }
-    return this.mapToDto(user);
   }
+  return this.mapToDto(user);
+}
+
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
     const user = await this.usersRepository.preload({
@@ -72,11 +79,17 @@ export class UsersService {
 }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.usersRepository.findOne({ where: { email } });
-  }
+    return this.usersRepository.findOne({ 
+        where: { email },
+        relations: ['producer']
+    });
+}
 
   async create(userData: Partial<User>): Promise<User> {
+    if (!userData.userType) {
+        userData.userType = 'consumer'; 
+    }
     const newUser = this.usersRepository.create(userData);
     return this.usersRepository.save(newUser);
-  }
+}
 }

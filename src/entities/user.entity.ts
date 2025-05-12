@@ -4,7 +4,9 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
 } from 'typeorm';
+import { Producer } from './producer.entity';
 
 @Entity('users')
 export class User {
@@ -23,9 +25,15 @@ export class User {
   @Column()
   password: string;
 
+  @Column({ type: 'varchar', default: 'consumer' })
+  userType: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @OneToOne(() => Producer, producer => producer.user)
+  producer?: Producer;
 }
