@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { ProducerModule } from './dto/producer/producer.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { UploadModule } from './upload/upload.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { UploadModule } from './upload/upload.module';
     ProducerModule,
     FavoritesModule,
     UploadModule,
+    CartModule,
   ],
 })
 export class AppModule {}
