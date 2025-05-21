@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-// import { User } from '../../users/entities/user.entity'; // Comentado pois User entity não foi encontrada no caminho esperado
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { User } from '../../entities/user.entity'; 
 
 @Entity('cards')
 export class Card {
@@ -9,9 +9,9 @@ export class Card {
   @Column()
   userId: number; // Ou string, dependendo do tipo do ID do User. Este campo será usado para associar o cartão ao usuário.
 
-  // @ManyToOne(() => User, (user) => user.cards, { onDelete: 'CASCADE' })
-  // @JoinColumn({ name: 'userId' })
-  // user: User; // Relação com User comentada temporariamente
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'userId' })
+  user: User; // Relação com User comentada temporariamente
 
   @Column({ length: 4 })
   last4Digits: string;

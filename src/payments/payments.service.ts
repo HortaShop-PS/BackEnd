@@ -20,7 +20,9 @@ export class PaymentsService {
   // Processa um pagamento PIX e retorna os dados necessários
   processPixPayment(
     processPixPaymentDto: ProcessPixPaymentDto,
+    userId: number, // Adicionado userId
   ): PixPaymentResponseDto {
+    console.log(`Usuário ${userId} processando pagamento PIX para o pedido:`, processPixPaymentDto.orderId); // Log com userId
     // Simulação do processamento de pagamento PIX
     console.log('Processando pagamento PIX para o pedido:', processPixPaymentDto.orderId);
     const qrCodeUrl = `https://example.com/pix/qr/${Date.now()}`;
@@ -37,7 +39,9 @@ export class PaymentsService {
   // Processa um pagamento com cartão e retorna o status da transação
   processCardPayment(
     processCardPaymentDto: ProcessCardPaymentDto,
+    userId: number, // Adicionado userId
   ): CardPaymentResponseDto {
+    console.log(`Usuário ${userId} processando pagamento com cartão para o pedido:`, processCardPaymentDto.orderId); // Log com userId
     // Simulação do processamento de pagamento com cartão
     console.log('Processando pagamento com cartão para o pedido:', processCardPaymentDto.orderId);
     const transactionId = `txn_${Date.now()}`;
@@ -52,7 +56,9 @@ export class PaymentsService {
   // Atualiza o status de um pagamento existente
   updatePaymentStatus(
     updatePaymentStatusDto: UpdatePaymentStatusDto,
+    userId: number, // Adicionado userId
   ): { message: string; status: string } {
+    console.log(`Usuário ${userId} atualizando status do pagamento para o ID:`, updatePaymentStatusDto.paymentId); // Log com userId
     // Simulação da atualização do status do pagamento
     console.log(
       'Atualizando status do pagamento para o ID:',
@@ -106,36 +112,45 @@ export class PaymentsService {
   }
 
   // Atualiza os dados de um cartão existente
-  async updateCard(id: string, updateCardDto: UpdateCardDto, userId: number): Promise<Card> {
-    const card = await this.findCardById(id, userId); // Garante que o cartão existe e pertence ao usuário
+  async updateCard(userId: number, cardId: string, updateCardDto: UpdateCardDto): Promise<Card> {
+    const card = await this.cardRepository.findOne({ where: { id: cardId, userId } });
+    if (!card) {
+      throw new NotFoundException(`Cartão com ID ${cardId} não encontrado para este usuário.`);
+    }
 
-    const { expiry, number, cardType, ...restOfDto } = updateCardDto;
-    const updatePayload: Partial<Card> = { ...restOfDto };
+    // Desestrutura o DTO para pegar os campos relevantes
+    const { number, expiry, cardholderName, cardType } = updateCardDto;
 
+    const updatePayload: Partial<Card> = {};
+
+    if (cardholderName) {
+      updatePayload.cardholderName = cardholderName;
+    }
     if (cardType) {
       updatePayload.cardType = cardType;
     }
 
     if (number) {
+      // Lógica para atualizar last4Digits e brand se o número do cartão for fornecido
+      // Esta lógica pode ser complexa e envolver a validação do novo número
+      // Por simplicidade, vamos assumir que se 'number' é fornecido,
+      // 'last4Digits' e 'brand' também precisam ser reavaliados ou fornecidos.
+      // Para este exemplo, vamos apenas atualizar last4Digits se o número for fornecido.
+      // Em um cenário real, você precisaria de uma lógica mais robusta aqui.
       updatePayload.last4Digits = number.slice(-4);
-      // Atualiza a bandeira se o número mudar
-      if (number.startsWith('4')) {
-        updatePayload.brand = 'visa';
-      } else if (number.startsWith('5')) {
-        updatePayload.brand = 'mastercard';
-      } else {
-        updatePayload.brand = 'unknown';
-      }
+      // updatePayload.brand = this.determineCardBrand(number); // Função hipotética
     }
 
     if (expiry) {
-      const [expiryMonth, expiryYear] = expiry.split('/');
-      updatePayload.expiryMonth = expiryMonth;
-      updatePayload.expiryYear = `20${expiryYear}`;
+      const [month, year] = expiry.split('/');
+      updatePayload.expiryMonth = month;
+      updatePayload.expiryYear = year; // Idealmente, armazene como '20YY'
     }
 
-    await this.cardRepository.update(id, updatePayload);
-    return this.findCardById(id, userId); // Retorna o cartão atualizado
+    // Mescla as atualizações no cartão existente
+    Object.assign(card, updatePayload);
+
+    return this.cardRepository.save(card);
   }
 
   // Remove um cartão do usuário

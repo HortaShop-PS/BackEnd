@@ -4,7 +4,7 @@ export class CreateCardDto {
   @IsString()
   @IsNotEmpty()
   @Length(13, 19)
-  @Matches(/^[0-9]+$/, { message: 'Card number must contain only digits' })
+  @Matches(/^[0-9]+$/, { message: 'O número do cartão deve conter apenas dígitos' })
   number: string;
 
   @IsString()
@@ -14,22 +14,22 @@ export class CreateCardDto {
   @IsString()
   @IsNotEmpty()
   @Matches(/^(0[1-9]|1[0-2])\/([0-9]{2})$/, {
-    message: 'Expiry date must be in MM/YY format',
+    message: 'A data de validade deve estar no formato MM/AA',
   })
-  expiry: string; // MM/YY
+  expiry: string; // MM/AA
 
   @IsString()
   @IsNotEmpty()
   @Length(3, 4)
-  @Matches(/^[0-9]+$/, { message: 'CVV must contain only digits' })
+  @Matches(/^[0-9]+$/, { message: 'O CVV deve conter apenas dígitos' })
   cvv: string;
 
   @IsString()
   @IsNotEmpty()
-  // TODO: Consider using an enum for cardType ('debit', 'credit') for better type safety
+  // TODO: Considerar usar um enum para cardType ('débito', 'crédito') para melhor segurança de tipo
   cardType: string; 
 
-  // userId will be typically extracted from the authenticated user token in the service/controller
-  // and not passed directly in the DTO for security reasons.
-  // If you need to associate with a user, handle it in the service layer.
+  // userId será tipicamente extraído do token de usuário autenticado no service/controller
+  // e não passado diretamente no DTO por razões de segurança.
+  // Se você precisar associar a um usuário, faça isso na camada de serviço.
 }

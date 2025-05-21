@@ -9,7 +9,7 @@ export class UpdateCardDto {
 
   @IsOptional()
   @IsString()
-  name?: string;
+  cardholderName?: string; // Alterado de 'name' para 'cardholderName'
 
   @IsOptional()
   @IsString()
@@ -18,14 +18,9 @@ export class UpdateCardDto {
   })
   expiry?: string; // MM/YY
 
-  @IsOptional()
-  @IsString()
-  @Length(3, 4)
-  @Matches(/^[0-9]+$/, { message: 'CVV must contain only digits' })
-  cvv?: string;
+  // CVV removido - não deve ser atualizado ou armazenado
 
   @IsOptional()
   @IsString()
-  // TODO: Consider using an enum for cardType ('debit', 'credit') for better type safety
   cardType?: string;
 }
