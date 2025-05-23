@@ -25,74 +25,68 @@ export class OrdersService {
   ) {}
 
   async createOrder(userId: number, createOrderDto: CreateOrderDto): Promise<Order> {
-    // Verificar se o usuário existe
-    const user = await this.userRepository.findOneBy({ id: userId });
-    if (!user) {
-      throw new NotFoundException(`Usuário com ID ${userId} não encontrado`);
-    }
-
-    // Buscar todos os produtos de uma vez
-    const productIds = createOrderDto.items.map(item => item.productId);
-    const products = await this.productRepository.find({
-      where: { id: In(productIds) },
-      relations: ['producer'],
-    });
-
-    // Verificar se todos os produtos existem
-    if (products.length !== productIds.length) {
-      throw new BadRequestException('Um ou mais produtos não foram encontrados');
-    }
-
-    // Criar o pedido
-    const order = this.orderRepository.create({
-      userId,
-      user,
-      status: createOrderDto.status || OrderStatus.PENDING,
-      shippingAddress: createOrderDto.shippingAddress,
-      paymentMethod: createOrderDto.paymentMethod,
-      totalPrice: 0, // Será calculado abaixo
-    });
-
-    // Salvar o pedido para obter o ID
-    await this.orderRepository.save(order);
-
-    // Criar os itens do pedido
-    const orderItems: OrderItem[] = [];
-    let totalPrice = 0;
-
-    for (const itemDto of createOrderDto.items) {
-      const product = products.find(p => p.id === itemDto.productId);
-      
-      // Verificar se o produto existe antes de acessar suas propriedades
-      if (!product) {
-        throw new BadRequestException(`Produto com ID ${itemDto.productId} não encontrado`);
+    return await this.orderRepository.manager.transaction(async manager => {
+      const user = await manager.findOneBy(User, { id: userId });
+      if (!user) {
+        throw new NotFoundException(`Usuário com ID ${userId} não encontrado`);
       }
-      
-      const orderItem = this.orderItemRepository.create({
-        order,
-        product,
-        productId: product.id,
-        producer: product.producer,
-        producerId: product.producer.id,
-        quantity: itemDto.quantity,
-        unitPrice: product.price,
-        totalPrice: product.price * itemDto.quantity,
-        notes: itemDto.notes,
+
+      const productIds = createOrderDto.items.map(item => item.productId);
+      const products = await manager.find(Product, {
+        where: { id: In(productIds) },
+        relations: ['producer'],
+        lock: { mode: 'pessimistic_read' }
       });
   
-      orderItems.push(orderItem);
-      totalPrice += orderItem.totalPrice;
-    }
-
-    // Salvar os itens do pedido
-    await this.orderItemRepository.save(orderItems);
-
-    // Atualizar o preço total do pedido
-    order.totalPrice = totalPrice;
-    order.items = orderItems;
-    await this.orderRepository.save(order);
-
-    return order;
+      if (products.length !== productIds.length) {
+        throw new BadRequestException('Um ou mais produtos não foram encontrados');
+      }
+  
+      const order = manager.create(Order, {
+        userId,
+        user,
+        status: createOrderDto.status || OrderStatus.PENDING,
+        shippingAddress: createOrderDto.shippingAddress,
+        paymentMethod: createOrderDto.paymentMethod,
+        totalPrice: 0,
+      });
+  
+      await manager.save(order);
+  
+      const orderItems: OrderItem[] = [];
+      let totalPrice = 0;
+  
+      for (const itemDto of createOrderDto.items) {
+        const product = products.find(p => p.id === itemDto.productId);
+        
+        if (!product) {
+          throw new BadRequestException(`Produto com ID ${itemDto.productId} não encontrado`);
+        }
+        
+        const orderItem = manager.create(OrderItem, {
+          order,
+          product,
+          productId: product.id,
+          producer: product.producer,
+          producerId: product.producer.id,
+          quantity: itemDto.quantity,
+          unitPrice: product.price,
+          totalPrice: product.price * itemDto.quantity,
+          notes: itemDto.notes,
+        });
+    
+        orderItems.push(orderItem);
+        totalPrice += orderItem.totalPrice;
+      }
+  
+      await manager.save(orderItems);
+  
+      order.totalPrice = totalPrice;
+      order.items = orderItems;
+      await manager.save(order);
+  
+      return order;
+    });
   }
 
   async getOrdersByUserId(userId: number): Promise<OrderSummaryResponseDto[]> {
@@ -113,7 +107,6 @@ export class OrdersService {
   }
 
   async getOrdersByProducerId(producerId: number): Promise<OrderSummaryResponseDto[]> {
-    // Buscar o produtor
     const producer = await this.producerRepository.findOne({
       where: { userId: producerId }
     });
@@ -122,13 +115,11 @@ export class OrdersService {
       throw new NotFoundException(`Produtor com userId ${producerId} não encontrado`);
     }
 
-    // Buscar todos os itens de pedido deste produtor
     const orderItems = await this.orderItemRepository.find({
       where: { producerId: producer.id },
       relations: ['order', 'order.items'],
     });
 
-    // Agrupar por pedido
     const orderMap = new Map<string, Order>();
     for (const item of orderItems) {
       if (!orderMap.has(item.order.id)) {
@@ -158,7 +149,6 @@ export class OrdersService {
       throw new NotFoundException(`Pedido com ID ${orderId} não encontrado`);
     }
 
-    // Se um userId foi fornecido, verificar se o pedido pertence a este usuário
     if (userId && order.userId !== userId) {
       throw new NotFoundException(`Pedido com ID ${orderId} não encontrado para este usuário`);
     }
@@ -174,8 +164,6 @@ export class OrdersService {
           unitPrice: item.unitPrice,
           totalPrice: item.totalPrice,
           producerId: item.producerId,
-          // Corrigir o acesso à propriedade 'name' que não existe em Producer
-          // Assumindo que o nome do produtor está em farmName ou em user.name
           producerName: item.producer.farmName || (item.producer.user?.name || 'Produtor'),
           notes: item.notes,
         };
