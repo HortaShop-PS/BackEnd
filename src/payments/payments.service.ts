@@ -74,7 +74,7 @@ export class PaymentsService {
 
   // Métodos de Gerenciamento de Cartão
   async createCard(createCardDto: CreateCardDto, userId: number): Promise<Card> {
-    const { number, expiry, cardType, ...restOfDto } = createCardDto;
+    const { number, expiry, cardType, name, ...restOfDto } = createCardDto; // Adicionado 'name' à desestruturação
     const [expiryMonth, expiryYear] = expiry.split('/');
 
     // Detecção simplificada da bandeira - considerar uma biblioteca mais robusta para produção
@@ -87,6 +87,7 @@ export class PaymentsService {
 
     const card = this.cardRepository.create({
       ...restOfDto,
+      cardholderName: name, // Mapeia 'name' do DTO para 'cardholderName' da entidade
       last4Digits: number.slice(-4),
       brand,
       expiryMonth,
@@ -119,7 +120,7 @@ export class PaymentsService {
     }
 
     // Desestrutura o DTO para pegar os campos relevantes
-    const { number, expiry, cardholderName, cardType } = updateCardDto;
+    const { number, expiry, cardholderName, cardType, isPrincipal } = updateCardDto; // Adicionar isPrincipal aqui
 
     const updatePayload: Partial<Card> = {};
 
@@ -129,14 +130,18 @@ export class PaymentsService {
     if (cardType) {
       updatePayload.cardType = cardType;
     }
+    // Adicionar lógica para isPrincipal aqui
+    if (isPrincipal !== undefined) { // Verifica se isPrincipal foi fornecido
+      // updatePayload.isPrincipal = isPrincipal; // Se você tiver um campo isPrincipal na entidade Card
+      // Aqui você precisaria implementar a lógica para definir este cartão como principal.
+      // Isso pode envolver:
+      // 1. Adicionar um campo `isPrincipal: boolean` à sua entidade `Card`.
+      // 2. Se `isPrincipal` for true, definir `card.isPrincipal = true`.
+      // 3. Se `isPrincipal` for true, buscar todos os outros cartões do usuário e definir `isPrincipal = false` para eles.
+      console.log(`Lógica para isPrincipal (${isPrincipal}) a ser implementada.`);
+    }
 
     if (number) {
-      // Lógica para atualizar last4Digits e brand se o número do cartão for fornecido
-      // Esta lógica pode ser complexa e envolver a validação do novo número
-      // Por simplicidade, vamos assumir que se 'number' é fornecido,
-      // 'last4Digits' e 'brand' também precisam ser reavaliados ou fornecidos.
-      // Para este exemplo, vamos apenas atualizar last4Digits se o número for fornecido.
-      // Em um cenário real, você precisaria de uma lógica mais robusta aqui.
       updatePayload.last4Digits = number.slice(-4);
       // updatePayload.brand = this.determineCardBrand(number); // Função hipotética
     }
@@ -144,10 +149,9 @@ export class PaymentsService {
     if (expiry) {
       const [month, year] = expiry.split('/');
       updatePayload.expiryMonth = month;
-      updatePayload.expiryYear = year; // Idealmente, armazene como '20YY'
+      updatePayload.expiryYear = `20${year}`; // Idealmente, armazene como '20YY'
     }
 
-    // Mescla as atualizações no cartão existente
     Object.assign(card, updatePayload);
 
     return this.cardRepository.save(card);

@@ -1,4 +1,4 @@
-import { IsString, IsOptional, Length, Matches } from 'class-validator';
+import { IsString, IsOptional, Length, Matches, IsBoolean } from 'class-validator';
 
 export class UpdateCardDto {
   @IsOptional()
@@ -23,4 +23,8 @@ export class UpdateCardDto {
   @IsOptional()
   @IsString()
   cardType?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isPrincipal?: boolean;
 }

@@ -22,10 +22,10 @@ export class Card {
   @Column({ length: 2 })
   expiryMonth: string; // MM
 
-  @Column({ length: 2 })
-  expiryYear: string; // YY
+  @Column({ length: 4 }) // Alterado de 2 para 4
+  expiryYear: string; // YYYY
 
-  @Column()
+  @Column() // Removido { nullable: true }
   cardholderName: string;
 
   @Column()
