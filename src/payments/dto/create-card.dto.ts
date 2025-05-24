@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, Length, Matches } from 'class-validator';
+import { IsString, IsNotEmpty, Length, Matches, IsOptional } from 'class-validator';
 
 export class CreateCardDto {
   @IsString()
@@ -28,6 +28,16 @@ export class CreateCardDto {
   @IsNotEmpty()
   // TODO: Considerar usar um enum para cardType ('débito', 'crédito') para melhor segurança de tipo
   cardType: string; 
+
+  @IsString()
+  @IsOptional()
+  @Length(1, 50) // Definindo um tamanho para o apelido
+  nickname?: string;
+
+  @IsString()
+  @IsOptional()
+  // TODO: Considerar usar um enum aqui também: 'credit', 'debit'
+  paymentMethodType?: string; // 'credit' or 'debit'
 
   // userId será tipicamente extraído do token de usuário autenticado no service/controller
   // e não passado diretamente no DTO por razões de segurança.

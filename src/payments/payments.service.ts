@@ -74,7 +74,7 @@ export class PaymentsService {
 
   // Métodos de Gerenciamento de Cartão
   async createCard(createCardDto: CreateCardDto, userId: number): Promise<Card> {
-    const { number, expiry, cardType, name, ...restOfDto } = createCardDto; // Adicionado 'name' à desestruturação
+    const { number, expiry, cardType, name, nickname, paymentMethodType, ...restOfDto } = createCardDto; // Adicionado nickname e paymentMethodType
     const [expiryMonth, expiryYear] = expiry.split('/');
 
     // Detecção simplificada da bandeira - considerar uma biblioteca mais robusta para produção
@@ -87,13 +87,15 @@ export class PaymentsService {
 
     const card = this.cardRepository.create({
       ...restOfDto,
-      cardholderName: name, // Mapeia 'name' do DTO para 'cardholderName' da entidade
+      cardholderName: name, 
       last4Digits: number.slice(-4),
-      brand,
+      brand, // brand é detectado, cardType é o tipo de cartão (Visa, Master, etc)
       expiryMonth,
-      expiryYear: `20${expiryYear}`, // Assumindo que o formato YY significa 20YY
+      expiryYear: `20${expiryYear}`,
       userId,
-      cardType, // Adiciona o tipo do cartão aqui
+      cardType, // Este é o tipo da bandeira (Visa, Mastercard)
+      nickname, // Adicionado nickname
+      paymentMethodType: paymentMethodType || 'credit', // Adicionado paymentMethodType, default para 'credit' se não fornecido
     });
     return this.cardRepository.save(card);
   }
@@ -119,8 +121,7 @@ export class PaymentsService {
       throw new NotFoundException(`Cartão com ID ${cardId} não encontrado para este usuário.`);
     }
 
-    // Desestrutura o DTO para pegar os campos relevantes
-    const { number, expiry, cardholderName, cardType, isPrincipal } = updateCardDto; // Adicionar isPrincipal aqui
+    const { number, expiry, cardholderName, cardType, isPrincipal, nickname, paymentMethodType } = updateCardDto; // Adicionado nickname e paymentMethodType
 
     const updatePayload: Partial<Card> = {};
 
@@ -128,17 +129,26 @@ export class PaymentsService {
       updatePayload.cardholderName = cardholderName;
     }
     if (cardType) {
-      updatePayload.cardType = cardType;
+      updatePayload.cardType = cardType; // Tipo da bandeira
+    }
+    if (nickname !== undefined) { // Permite limpar o nickname passando null ou string vazia se desejado, ou atualizar
+      updatePayload.nickname = nickname;
+    }
+    if (paymentMethodType) {
+      updatePayload.paymentMethodType = paymentMethodType; // 'credit' ou 'debit'
     }
     // Adicionar lógica para isPrincipal aqui
-    if (isPrincipal !== undefined) { // Verifica se isPrincipal foi fornecido
-      // updatePayload.isPrincipal = isPrincipal; // Se você tiver um campo isPrincipal na entidade Card
-      // Aqui você precisaria implementar a lógica para definir este cartão como principal.
-      // Isso pode envolver:
-      // 1. Adicionar um campo `isPrincipal: boolean` à sua entidade `Card`.
-      // 2. Se `isPrincipal` for true, definir `card.isPrincipal = true`.
-      // 3. Se `isPrincipal` for true, buscar todos os outros cartões do usuário e definir `isPrincipal = false` para eles.
-      console.log(`Lógica para isPrincipal (${isPrincipal}) a ser implementada.`);
+    if (isPrincipal !== undefined) {
+      if (isPrincipal) {
+        // Desmarca todos os outros cartões do usuário
+        await this.cardRepository.update(
+          { userId, isPrincipal: true },
+          { isPrincipal: false }
+        );
+        updatePayload.isPrincipal = true;
+      } else {
+        updatePayload.isPrincipal = false;
+      }
     }
 
     if (number) {

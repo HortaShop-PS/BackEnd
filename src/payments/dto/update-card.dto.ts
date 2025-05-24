@@ -27,4 +27,14 @@ export class UpdateCardDto {
   @IsOptional()
   @IsBoolean()
   isPrincipal?: boolean;
+
+  @IsString()
+  @IsOptional()
+  @Length(1, 50)
+  nickname?: string;
+
+  @IsString()
+  @IsOptional()
+  // TODO: Considerar usar um enum aqui também: 'credit', 'debit'
+  paymentMethodType?: string; // 'credit' or 'debit'
 }

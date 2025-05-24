@@ -31,6 +31,15 @@ export class Card {
   @Column()
   cardType: string; // 'debit' or 'credit'
 
+  @Column({ nullable: true }) // Adicionando nickname como opcional
+  nickname: string;
+
+  @Column({ default: 'credit' }) // Adicionando paymentMethodType com valor padrão 'credit'
+  paymentMethodType: string; // 'credit' or 'debit'
+
+  @Column({ default: false }) // Adicionando isPrincipal com valor padrão false
+  isPrincipal: boolean;
+
   // O CVV não deve ser armazenado por razões de segurança.
   // O número completo do cartão também não deve ser armazenado diretamente.
   // Idealmente, um token de um gateway de pagamento seria usado.
