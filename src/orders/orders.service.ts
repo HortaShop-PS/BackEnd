@@ -161,24 +161,16 @@ export class OrdersService {
       throw new NotFoundException(`Pedido com ID ${orderId} não encontrado`);
     }
 
-    if (userId && order.userId !== userId) {
-      throw new NotFoundException(`Pedido com ID ${orderId} não encontrado para este usuário`);
-    }    const itemsResponse: OrderItemResponseDto[] = await Promise.all(
+    const itemsResponse: OrderItemResponseDto[] = await Promise.all(
       order.items.map(async (item) => {
-        // Debug log to track review checking
-        console.log(`DEBUG - Checking review for orderItem ${item.id}, userId: ${userId}`);
-        
-        // Check if this orderItem has been reviewed (since orderItem belongs to specific user)
         const review = await this.reviewRepository.findOne({
           where: { 
-            orderItemId: item.id
+            orderItemId: item.id,
+            userId: userId // Ensure review belongs to the user viewing the order
           }
         });
         
-        // Additional debug to verify review status and ownership
-        console.log(`DEBUG - Review found for orderItem ${item.id}: ${!!review}`, review ? { reviewId: review.id, reviewUserId: review.userId } : 'No review');
-          // Verify that if a review exists, it belongs to the current user
-        const isReviewedByCurrentUser = review ? (review.userId === userId) : false;        return {
+        return {
           id: item.id,
           productId: item.productId,
           productName: item.product?.name || 'Produto não encontrado',
@@ -189,10 +181,75 @@ export class OrdersService {
           producerId: item.producerId,
           producerName: item.producer?.farmName || item.producer?.user?.name || 'Produtor',
           notes: item.notes,
-          reviewed: isReviewedByCurrentUser,
+          reviewed: !!review,
         };
       })
-    );    return {
+    );
+
+    return {
+      id: order.id,
+      userId: order.userId,
+      status: order.status,
+      totalPrice: Number(order.totalPrice) || 0,
+      shippingAddress: order.shippingAddress,
+      paymentMethod: order.paymentMethod,
+      trackingCode: order.trackingCode,
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt,
+      items: itemsResponse,
+    };
+  }
+
+  async getProducerOrderDetails(orderId: string, producerUserId: number): Promise<OrderDetailResponseDto> {
+    const producer = await this.producerRepository.findOne({
+      where: { userId: producerUserId }
+    });
+
+    if (!producer) {
+      throw new NotFoundException(`Produtor com userId ${producerUserId} não encontrado`);
+    }
+
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+      relations: ['items', 'items.product', 'items.producer', 'items.producer.user', 'user'],
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Pedido com ID ${orderId} não encontrado`);
+    }
+
+    // Ensure at least one item in the order belongs to this producer
+    const hasProducerItems = order.items.some(item => item.producerId === producer.id);
+    if (!hasProducerItems) {
+      throw new NotFoundException(`Pedido com ID ${orderId} não contém itens do produtor ${producer.farmName}`);
+    }
+
+    const itemsResponse: OrderItemResponseDto[] = await Promise.all(
+      order.items.map(async (item) => {
+        const review = await this.reviewRepository.findOne({
+          where: { 
+            orderItemId: item.id,
+            userId: order.userId // Review is associated with the customer (order.userId)
+          }
+        });
+        
+        return {
+          id: item.id,
+          productId: item.productId,
+          productName: item.product?.name || 'Produto não encontrado',
+          productImage: item.product?.imageUrl || '',
+          quantity: item.quantity,
+          unitPrice: Number(item.unitPrice) || 0,
+          totalPrice: Number(item.totalPrice) || 0,
+          producerId: item.producerId,
+          producerName: item.producer?.farmName || item.producer?.user?.name || 'Produtor',
+          notes: item.notes,
+          reviewed: !!review, // Producers just need to know if it's reviewed, not by whom
+        };
+      })
+    );
+
+    return {
       id: order.id,
       userId: order.userId,
       status: order.status,
