@@ -4,22 +4,43 @@ import { Repository, Like, Between, MoreThanOrEqual, LessThanOrEqual } from 'typ
 import { Product } from './product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { Producer } from 'src/entities/producer.entity';
+import { Review } from '../reviews/entities/review.entity';
 
 @Injectable()
 export class ProductService {
   constructor(
     @InjectRepository(Product) private readonly repo: Repository<Product>,
+    @InjectRepository(Review) private readonly reviewRepo: Repository<Review>,
   ) {}
 
-  async getFeatured(limit = 10): Promise<Product[]> {
-    return this.repo.find({
+  async getFeatured(limit = 10): Promise<(Product & { averageRating?: number; totalReviews?: number })[]> {
+    const products = await this.repo.find({
       where: { isFeatured: true },
       order: { name: 'ASC' },
       take: limit,
     });
+    
+    // Buscar avaliações para todos os produtos
+    const productsWithReviews = await Promise.all(products.map(async (product) => {
+      const reviews = await this.reviewRepo.find({ where: { productId: product.id } });
+      
+      // Calcular média de avaliações
+      const totalReviews = reviews.length;
+      const averageRating = totalReviews > 0
+        ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
+        : 0;
+      
+      return {
+        ...product,
+        averageRating,
+        totalReviews
+      };
+    }));
+    
+    return productsWithReviews;
   }
 
-  async findById(id: string): Promise<Product> {
+  async findById(id: string): Promise<Product & { averageRating?: number; totalReviews?: number }> {
     try {
       const product = await this.repo.findOneBy({ id });
       
@@ -27,7 +48,20 @@ export class ProductService {
         throw new NotFoundException(`Produto com ID ${id} não encontrado`);
       }
       
-      return product;
+      // Buscar avaliações do produto
+      const reviews = await this.reviewRepo.find({ where: { productId: id } });
+      
+      // Calcular média de avaliações
+      const totalReviews = reviews.length;
+      const averageRating = totalReviews > 0
+        ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
+        : 0;
+      
+      return {
+        ...product,
+        averageRating,
+        totalReviews
+      };
     } catch (error) {
       console.error('Erro ao buscar produto:', error);
       throw error;
@@ -45,7 +79,7 @@ export class ProductService {
     isOrganic?: boolean;
     harvestSeason?: string;
     origin?: string;
-  }): Promise<Product[]> {
+  }): Promise<(Product & { averageRating?: number; totalReviews?: number })[]> {
     const {
       name,
       minPrice,
@@ -102,7 +136,26 @@ export class ProductService {
       query.take(limit);
     }
 
-    return query.getMany();
+    const products = await query.getMany();
+    
+    // Buscar avaliações para todos os produtos
+    const productsWithReviews = await Promise.all(products.map(async (product) => {
+      const reviews = await this.reviewRepo.find({ where: { productId: product.id } });
+      
+      // Calcular média de avaliações
+      const totalReviews = reviews.length;
+      const averageRating = totalReviews > 0
+        ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
+        : 0;
+      
+      return {
+        ...product,
+        averageRating,
+        totalReviews
+      };
+    }));
+    
+    return productsWithReviews;
   }
 
 
@@ -124,7 +177,7 @@ async createProduct(createProductDto: CreateProductDto & { producerId: number })
   return product;
 }
 
-async getProductsByProducerId(producerId: number): Promise<Product[]> {
+async getProductsByProducerId(producerId: number): Promise<(Product & { averageRating?: number; totalReviews?: number })[]> {
   try {
     const producerRepo = this.repo.manager.getRepository(Producer);
     const producer = await producerRepo.findOne({
@@ -135,25 +188,62 @@ async getProductsByProducerId(producerId: number): Promise<Product[]> {
       throw new NotFoundException(`Produtor com userId ${producerId} não encontrado`);
     }
 
-   
-    return this.repo.find({
+    const products = await this.repo.find({
       where: { 
         producer: { id: producer.id } 
       },
       order: { createdAt: 'DESC' } as any
     });
+    
+    // Buscar avaliações para todos os produtos
+    const productsWithReviews = await Promise.all(products.map(async (product) => {
+      const reviews = await this.reviewRepo.find({ where: { productId: product.id } });
+      
+      // Calcular média de avaliações
+      const totalReviews = reviews.length;
+      const averageRating = totalReviews > 0
+        ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
+        : 0;
+      
+      return {
+        ...product,
+        averageRating,
+        totalReviews
+      };
+    }));
+    
+    return productsWithReviews;
   } catch (error) {
     console.error('Erro ao buscar produtos do produtor:', error);
     throw error;
   }
 }
 
-async getAllProducts(): Promise<Product[]> {
+async getAllProducts(): Promise<(Product & { averageRating?: number; totalReviews?: number })[]> {
   try {
-    return this.repo.find({
+    const products = await this.repo.find({
       order: { createdAt: 'DESC' },
       relations: ['producer']
     });
+    
+    // Buscar avaliações para todos os produtos
+    const productsWithReviews = await Promise.all(products.map(async (product) => {
+      const reviews = await this.reviewRepo.find({ where: { productId: product.id } });
+      
+      // Calcular média de avaliações
+      const totalReviews = reviews.length;
+      const averageRating = totalReviews > 0
+        ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
+        : 0;
+      
+      return {
+        ...product,
+        averageRating,
+        totalReviews
+      };
+    }));
+    
+    return productsWithReviews;
   } catch (error) {
     console.error('Erro ao buscar todos os produtos:', error);
     throw error;

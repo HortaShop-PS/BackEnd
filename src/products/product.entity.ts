@@ -1,5 +1,6 @@
 import { Producer } from 'src/entities/producer.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn, CreateDateColumn } from 'typeorm';
+import { Review } from '../reviews/entities/review.entity';
 
 @Entity()
 export class Product {
@@ -45,4 +46,7 @@ export class Product {
 
   @Column({ nullable: true })
   description?: string;
+
+  @OneToMany(() => Review, review => review.product)
+  reviews: Review[];
 }

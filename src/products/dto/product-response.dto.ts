@@ -10,4 +10,6 @@ export class ProductResponseDto {
   isOrganic: boolean;
   origin?: string;
   description?: string;
+  averageRating?: number;
+  totalReviews?: number;
 }
