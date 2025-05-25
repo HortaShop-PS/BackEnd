@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Order, OrderStatus } from './entities/order.entity';
@@ -7,6 +8,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { Product } from '../products/product.entity';
 import { User } from '../entities/user.entity';
 import { Producer } from '../entities/producer.entity';
+import { Review } from '../reviews/entities/review.entity';
 import { OrderDetailResponseDto, OrderItemResponseDto, OrderSummaryResponseDto } from './dto/order-response.dto';
 
 @Injectable()
@@ -22,6 +24,9 @@ export class OrdersService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Producer)
     private readonly producerRepository: Repository<Producer>,
+    @InjectRepository(Review)
+    private readonly reviewRepository: Repository<Review>,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async createOrder(userId: number, createOrderDto: CreateOrderDto): Promise<Order> {
@@ -34,8 +39,7 @@ export class OrdersService {
       const productIds = createOrderDto.items.map(item => item.productId);
       const products = await manager.find(Product, {
         where: { id: In(productIds) },
-        relations: ['producer'],
-        lock: { mode: 'pessimistic_read' }
+        relations: ['producer']
       });
   
       if (products.length !== productIds.length) {
@@ -88,21 +92,31 @@ export class OrdersService {
       return order;
     });
   }
-
   async getOrdersByUserId(userId: number): Promise<OrderSummaryResponseDto[]> {
     const orders = await this.orderRepository.find({
       where: { userId },
       order: { createdAt: 'DESC' },
-      relations: ['items'],
-    });
+      relations: ['items', 'items.product', 'items.producer', 'items.producer.user'],    });
 
     return orders.map(order => ({
       id: order.id,
       status: order.status,
-      totalPrice: order.totalPrice,
+      totalPrice: Number(order.totalPrice) || 0,
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
-      itemCount: order.items.length,
+      itemCount: order.items.length,      items: order.items.map(item => ({
+        id: item.id,
+        productId: item.productId,
+        productName: item.product?.name || 'Produto não encontrado',
+        productImage: item.product?.imageUrl || '',
+        quantity: item.quantity,
+        unitPrice: Number(item.unitPrice) || 0,
+        totalPrice: Number(item.totalPrice) || 0,
+        producerId: item.producerId,
+        producerName: item.producer?.farmName || item.producer?.user?.name || 'Produtor',
+        notes: item.notes,
+        reviewed: false, // This will be determined in OrderDetail, not needed for summary
+      })),
     }));
   }
 
@@ -128,21 +142,19 @@ export class OrdersService {
     }
 
     const orders = Array.from(orderMap.values());
-    
-    return orders.map(order => ({
+      return orders.map(order => ({
       id: order.id,
       status: order.status,
-      totalPrice: order.totalPrice,
+      totalPrice: Number(order.totalPrice) || 0,
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
       itemCount: order.items.length,
     }));
   }
-
   async getOrderById(orderId: string, userId?: number): Promise<OrderDetailResponseDto> {
     const order = await this.orderRepository.findOne({
       where: { id: orderId },
-      relations: ['items', 'items.product', 'items.producer'],
+      relations: ['items', 'items.product', 'items.producer', 'items.producer.user'],
     });
 
     if (!order) {
@@ -151,30 +163,40 @@ export class OrdersService {
 
     if (userId && order.userId !== userId) {
       throw new NotFoundException(`Pedido com ID ${orderId} não encontrado para este usuário`);
-    }
-
-    const itemsResponse: OrderItemResponseDto[] = await Promise.all(
+    }    const itemsResponse: OrderItemResponseDto[] = await Promise.all(
       order.items.map(async (item) => {
-        return {
+        // Debug log to track review checking
+        console.log(`DEBUG - Checking review for orderItem ${item.id}, userId: ${userId}`);
+        
+        // Check if this orderItem has been reviewed (since orderItem belongs to specific user)
+        const review = await this.reviewRepository.findOne({
+          where: { 
+            orderItemId: item.id
+          }
+        });
+        
+        // Additional debug to verify review status and ownership
+        console.log(`DEBUG - Review found for orderItem ${item.id}: ${!!review}`, review ? { reviewId: review.id, reviewUserId: review.userId } : 'No review');
+          // Verify that if a review exists, it belongs to the current user
+        const isReviewedByCurrentUser = review ? (review.userId === userId) : false;        return {
           id: item.id,
           productId: item.productId,
-          productName: item.product.name,
-          productImage: item.product.imageUrl,
+          productName: item.product?.name || 'Produto não encontrado',
+          productImage: item.product?.imageUrl || '',
           quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          totalPrice: item.totalPrice,
+          unitPrice: Number(item.unitPrice) || 0,
+          totalPrice: Number(item.totalPrice) || 0,
           producerId: item.producerId,
-          producerName: item.producer.farmName || (item.producer.user?.name || 'Produtor'),
+          producerName: item.producer?.farmName || item.producer?.user?.name || 'Produtor',
           notes: item.notes,
+          reviewed: isReviewedByCurrentUser,
         };
       })
-    );
-
-    return {
+    );    return {
       id: order.id,
       userId: order.userId,
       status: order.status,
-      totalPrice: order.totalPrice,
+      totalPrice: Number(order.totalPrice) || 0,
       shippingAddress: order.shippingAddress,
       paymentMethod: order.paymentMethod,
       trackingCode: order.trackingCode,
@@ -185,13 +207,31 @@ export class OrdersService {
   }
 
   async updateOrderStatus(orderId: string, status: OrderStatus): Promise<Order> {
-    const order = await this.orderRepository.findOneBy({ id: orderId });
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+      relations: ['items', 'items.product']
+    });
     
     if (!order) {
       throw new NotFoundException(`Pedido com ID ${orderId} não encontrado`);
     }
 
+    const previousStatus = order.status;
     order.status = status;
-    return this.orderRepository.save(order);
+    const updatedOrder = await this.orderRepository.save(order);
+      // Se o pedido foi marcado como entregue, emitir evento para notificar sobre avaliações
+    if (status === OrderStatus.DELIVERED && previousStatus !== OrderStatus.DELIVERED) {
+      this.eventEmitter.emit('order.delivered', {
+        orderId: order.id,
+        userId: order.userId,
+        items: order.items.map(item => ({
+          id: item.id,
+          productId: item.productId,
+          productName: item.product?.name || 'Produto não encontrado'
+        }))
+      });
+    }
+    
+    return updatedOrder;
   }
 }
