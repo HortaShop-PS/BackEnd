@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { OrdersController, ProducerOrdersController } from './orders.controller';
+import {
+  OrdersController,
+  ProducerOrdersController,
+} from './orders.controller';
 import { OrdersService } from './orders.service';
 import { Order } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
@@ -12,7 +15,14 @@ import { Review } from '../reviews/entities/review.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Order, OrderItem, Product, User, Producer, Review]),
+    TypeOrmModule.forFeature([
+      Order,
+      OrderItem,
+      Product,
+      User,
+      Producer,
+      Review,
+    ]),
   ],
   controllers: [OrdersController, ProducerOrdersController],
   providers: [OrdersService],

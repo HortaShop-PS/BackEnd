@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -18,14 +22,14 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-  ) { }
+  ) {}
 
   async validateUser(
     email: string,
     pass: string,
   ): Promise<UserResponseDto | null> {
     const user = await this.usersService.findByEmail(email);
-    if (user && user.password && await bcrypt.compare(pass, user.password)) {
+    if (user && user.password && (await bcrypt.compare(pass, user.password))) {
       const { password, ...result } = user;
       return result as UserResponseDto;
     }
@@ -33,17 +37,17 @@ export class AuthService {
   }
 
   async login(user: UserResponseDto) {
-    const payload = { 
-        email: user.email,
-        sub: user.id,
-        userType: user.userType, 
-        producerId: user.producer?.id || null 
+    const payload = {
+      email: user.email,
+      sub: user.id,
+      userType: user.userType,
+      producerId: user.producer?.id || null,
     };
     return {
-        access_token: this.jwtService.sign(payload),
-        userType: user.userType,
+      access_token: this.jwtService.sign(payload),
+      userType: user.userType,
     };
-}
+  }
 
   async register(registerAuthDto: RegisterAuthDto): Promise<UserResponseDto> {
     try {

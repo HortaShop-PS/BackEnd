@@ -1,10 +1,18 @@
-import { IsString, IsNotEmpty, Length, Matches, IsOptional } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  Length,
+  Matches,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateCardDto {
   @IsString()
   @IsNotEmpty()
   @Length(13, 19)
-  @Matches(/^[0-9]+$/, { message: 'O número do cartão deve conter apenas dígitos' })
+  @Matches(/^[0-9]+$/, {
+    message: 'O número do cartão deve conter apenas dígitos',
+  })
   number: string;
 
   @IsString()
@@ -27,7 +35,7 @@ export class CreateCardDto {
   @IsString()
   @IsNotEmpty()
   // TODO: Considerar usar um enum para brand ('visa', 'mastercard') para melhor segurança de tipo
-  brand: string; 
+  brand: string;
 
   @IsString()
   @IsOptional()

@@ -19,7 +19,7 @@ export class UploadService {
         mimetype: file.mimetype,
         data: file.buffer,
       });
-  
+
       const savedImage = await this.imageRepository.save(image);
       return savedImage.id;
     } catch (error) {
@@ -27,7 +27,6 @@ export class UploadService {
       throw new Error('Falha ao processar imagem');
     }
   }
-  
 
   async getImageById(id: string): Promise<Image | null> {
     return this.imageRepository.findOne({ where: { id } });

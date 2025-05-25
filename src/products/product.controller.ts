@@ -1,4 +1,15 @@
-import { Controller, Get, Query, Param, UseGuards, Body, Post, Request, UnauthorizedException, ParseUUIDPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  Param,
+  UseGuards,
+  Body,
+  Post,
+  Request,
+  UnauthorizedException,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductResponseDto } from './dto/product-response.dto';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -6,7 +17,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('products')
 export class ProductController {
-  constructor(private readonly service: ProductService) { }
+  constructor(private readonly service: ProductService) {}
 
   @Get('featured')
   async getFeatured(
@@ -27,7 +38,7 @@ export class ProductController {
       isOrganic: p.isOrganic,
       origin: p.origin,
       averageRating: p.averageRating,
-      totalReviews: p.totalReviews
+      totalReviews: p.totalReviews,
     }));
   }
 
@@ -52,7 +63,7 @@ export class ProductController {
       limit: limit ? Number(limit) : undefined,
       category,
       isOrganic: isOrganic ? isOrganic === true : undefined,
-      origin
+      origin,
     });
 
     return products.map((p) => ({
@@ -67,7 +78,7 @@ export class ProductController {
       isOrganic: p.isOrganic,
       origin: p.origin,
       averageRating: p.averageRating,
-      totalReviews: p.totalReviews
+      totalReviews: p.totalReviews,
     }));
   }
 
@@ -88,14 +99,16 @@ export class ProductController {
       origin: p.origin,
       description: p.description,
       averageRating: p.averageRating,
-      totalReviews: p.totalReviews
+      totalReviews: p.totalReviews,
     }));
   }
 
   @Get(':id')
-  async getProductById(@Param('id', ParseUUIDPipe) id: string): Promise<ProductResponseDto> {
+  async getProductById(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<ProductResponseDto> {
     const product = await this.service.findById(id);
-  
+
     return {
       id: product.id,
       name: product.name,
@@ -109,19 +122,24 @@ export class ProductController {
       origin: product.origin,
       description: product.description,
       averageRating: product.averageRating,
-      totalReviews: product.totalReviews
+      totalReviews: product.totalReviews,
     };
   }
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  async createProduct(@Body() createProductDto: CreateProductDto, @Request() req) {
+  async createProduct(
+    @Body() createProductDto: CreateProductDto,
+    @Request() req,
+  ) {
     if (req.user.userType !== 'producer') {
-      throw new UnauthorizedException('Apenas produtores podem cadastrar produtos');
+      throw new UnauthorizedException(
+        'Apenas produtores podem cadastrar produtos',
+      );
     }
     return this.service.createProduct({
       ...createProductDto,
-      producerId: req.user.id
+      producerId: req.user.id,
     });
   }
 
@@ -129,14 +147,16 @@ export class ProductController {
   @UseGuards(JwtAuthGuard)
   async getProducerProducts(
     @Param('userId') userId: string,
-    @Request() req
+    @Request() req,
   ): Promise<ProductResponseDto[]> {
     if (req.user.userType !== 'producer') {
-      throw new UnauthorizedException('Apenas produtores podem acessar seus produtos');
+      throw new UnauthorizedException(
+        'Apenas produtores podem acessar seus produtos',
+      );
     }
-  
+
     const products = await this.service.getProductsByProducerId(Number(userId));
-  
+
     return products.map((p) => ({
       id: p.id,
       name: p.name,
@@ -150,7 +170,7 @@ export class ProductController {
       isOrganic: p.isOrganic,
       origin: p.origin,
       averageRating: p.averageRating,
-      totalReviews: p.totalReviews
+      totalReviews: p.totalReviews,
     }));
   }
 }

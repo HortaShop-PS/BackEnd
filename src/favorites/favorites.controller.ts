@@ -1,4 +1,14 @@
-import { Controller, Post, Delete, Get, Param, UseGuards, Request, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Delete,
+  Get,
+  Param,
+  UseGuards,
+  Request,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ProductResponseDto } from '../products/dto/product-response.dto';
@@ -35,8 +45,8 @@ export class FavoritesController {
   ): Promise<{ products: ProductResponseDto[] }> {
     const userId = req.user.userId;
     const favorites = await this.favoritesService.getUserFavorites(userId);
-    
-    const products = favorites.map(favorite => ({
+
+    const products = favorites.map((favorite) => ({
       id: favorite.product.id,
       name: favorite.product.name,
       price: Number(favorite.product.price),
@@ -45,7 +55,7 @@ export class FavoritesController {
       isNew: favorite.product.isNew,
       isOrganic: favorite.product.isOrganic,
       category: favorite.product.category,
-      isFeatured: favorite.product.isFeatured // Add this line
+      isFeatured: favorite.product.isFeatured, // Add this line
     }));
 
     return { products };
@@ -57,7 +67,10 @@ export class FavoritesController {
     @Param('productId') productId: string,
   ): Promise<{ isFavorite: boolean }> {
     const userId = req.user.userId;
-    const isFavorite = await this.favoritesService.checkIsFavorite(userId, productId);
+    const isFavorite = await this.favoritesService.checkIsFavorite(
+      userId,
+      productId,
+    );
     return { isFavorite };
   }
 }

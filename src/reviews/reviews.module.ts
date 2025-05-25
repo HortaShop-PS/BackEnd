@@ -11,7 +11,14 @@ import { Producer } from '../entities/producer.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Review, Product, User, OrderItem, Order, Producer]),
+    TypeOrmModule.forFeature([
+      Review,
+      Product,
+      User,
+      OrderItem,
+      Order,
+      Producer,
+    ]),
   ],
   controllers: [ReviewsController],
   providers: [ReviewsService],

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cart } from '../entities/cart.entity';
@@ -25,7 +29,8 @@ export class CartService {
     return {
       id: cart.id,
       userId: cart.userId,
-      items: cart.items?.map(item => this.mapToCartItemResponseDto(item)) || [],
+      items:
+        cart.items?.map((item) => this.mapToCartItemResponseDto(item)) || [],
       total: Number(cart.total),
       createdAt: cart.createdAt,
       updatedAt: cart.updatedAt,
@@ -81,9 +86,15 @@ export class CartService {
     return this.cartRepository.save(newCart);
   }
 
-  async addItemToCart(userId: number, productId: string, quantity: number): Promise<CartResponseDto> {
+  async addItemToCart(
+    userId: number,
+    productId: string,
+    quantity: number,
+  ): Promise<CartResponseDto> {
     // Verificar se o produto existe
-    const product = await this.productRepository.findOne({ where: { id: productId } });
+    const product = await this.productRepository.findOne({
+      where: { id: productId },
+    });
     if (!product) {
       throw new NotFoundException(`Produto com ID ${productId} não encontrado`);
     }
@@ -99,7 +110,7 @@ export class CartService {
     }
 
     // Verificar se o item já existe no carrinho
-    let cartItem = cart.items?.find(item => item.productId === productId);
+    let cartItem = cart.items?.find((item) => item.productId === productId);
 
     if (cartItem) {
       // Atualizar quantidade se o item já existe
@@ -133,7 +144,11 @@ export class CartService {
     return this.getCart(userId);
   }
 
-  async updateCartItemQuantity(userId: number, itemId: number, quantity: number): Promise<CartResponseDto> {
+  async updateCartItemQuantity(
+    userId: number,
+    itemId: number,
+    quantity: number,
+  ): Promise<CartResponseDto> {
     // Verificar se o carrinho existe
     const cart = await this.cartRepository.findOne({
       where: { userId },
@@ -141,13 +156,17 @@ export class CartService {
     });
 
     if (!cart) {
-      throw new NotFoundException(`Carrinho para o usuário com ID ${userId} não encontrado`);
+      throw new NotFoundException(
+        `Carrinho para o usuário com ID ${userId} não encontrado`,
+      );
     }
 
     // Verificar se o item existe no carrinho
-    const cartItem = cart.items.find(item => item.id === itemId);
+    const cartItem = cart.items.find((item) => item.id === itemId);
     if (!cartItem) {
-      throw new NotFoundException(`Item com ID ${itemId} não encontrado no carrinho`);
+      throw new NotFoundException(
+        `Item com ID ${itemId} não encontrado no carrinho`,
+      );
     }
 
     if (quantity <= 0) {
@@ -167,7 +186,10 @@ export class CartService {
     return this.getCart(userId);
   }
 
-  async removeCartItem(userId: number, itemId: number): Promise<CartResponseDto> {
+  async removeCartItem(
+    userId: number,
+    itemId: number,
+  ): Promise<CartResponseDto> {
     // Verificar se o carrinho existe
     const cart = await this.cartRepository.findOne({
       where: { userId },
@@ -175,13 +197,17 @@ export class CartService {
     });
 
     if (!cart) {
-      throw new NotFoundException(`Carrinho para o usuário com ID ${userId} não encontrado`);
+      throw new NotFoundException(
+        `Carrinho para o usuário com ID ${userId} não encontrado`,
+      );
     }
 
     // Verificar se o item existe no carrinho
-    const itemIndex = cart.items.findIndex(item => item.id === itemId);
+    const itemIndex = cart.items.findIndex((item) => item.id === itemId);
     if (itemIndex === -1) {
-      throw new NotFoundException(`Item com ID ${itemId} não encontrado no carrinho`);
+      throw new NotFoundException(
+        `Item com ID ${itemId} não encontrado no carrinho`,
+      );
     }
 
     // Remover o item do banco de dados
@@ -205,7 +231,9 @@ export class CartService {
     });
 
     if (!cart) {
-      throw new NotFoundException(`Carrinho para o usuário com ID ${userId} não encontrado`);
+      throw new NotFoundException(
+        `Carrinho para o usuário com ID ${userId} não encontrado`,
+      );
     }
 
     // Remover todos os itens do carrinho

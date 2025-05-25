@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -17,14 +21,16 @@ export class ProducerService {
   async create(createProducerDto: CreateProducerDto): Promise<any> {
     try {
       if (createProducerDto.email) {
-        const existingUser = await this.usersService.findByEmail(createProducerDto.email);
+        const existingUser = await this.usersService.findByEmail(
+          createProducerDto.email,
+        );
         if (existingUser) {
           throw new BadRequestException('Email já está em uso');
         }
       }
 
       const hashedPassword = await bcrypt.hash(createProducerDto.password, 10);
-      
+
       const newUser = await this.usersService.create({
         name: createProducerDto.name || 'Produtor',
         email: createProducerDto.email,
@@ -46,13 +52,13 @@ export class ProducerService {
       const savedProducer = await this.producerRepository.save(producer);
       const { user, ...producerResult } = savedProducer;
       const { password, ...userResult } = user;
-      
+
       return {
         message: 'Produtor criado com sucesso!',
         data: {
           ...producerResult,
           user: userResult,
-        }
+        },
       };
     } catch (error) {
       console.error('Erro ao criar produtor:', error);
@@ -64,9 +70,9 @@ export class ProducerService {
   }
 
   async findByUserId(userId: number): Promise<Producer | null> {
-    return this.producerRepository.findOne({ 
+    return this.producerRepository.findOne({
       where: { userId },
-      select: ['id', 'userId', 'farmName', 'cnpj'] 
+      select: ['id', 'userId', 'farmName', 'cnpj'],
     });
   }
 

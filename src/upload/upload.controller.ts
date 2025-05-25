@@ -1,4 +1,15 @@
-import { Controller, Post, UseInterceptors, UploadedFile, UseGuards, Request, BadRequestException, Get, Param, Res } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  UseInterceptors,
+  UploadedFile,
+  UseGuards,
+  Request,
+  BadRequestException,
+  Get,
+  Param,
+  Res,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -16,12 +27,17 @@ export class UploadController {
       storage: memoryStorage(),
       fileFilter: (req, file, cb) => {
         if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-          return cb(new BadRequestException('Apenas arquivos de imagem são permitidos!'), false);
+          return cb(
+            new BadRequestException(
+              'Apenas arquivos de imagem são permitidos!',
+            ),
+            false,
+          );
         }
         cb(null, true);
       },
       limits: {
-        fileSize: 5 * 1024 * 1024, 
+        fileSize: 5 * 1024 * 1024,
       },
     }),
   )
@@ -31,10 +47,8 @@ export class UploadController {
     }
 
     try {
-
       const imageId = await this.uploadService.saveImageToDatabase(file);
-      
-     
+
       return {
         url: `/upload/image/${imageId}`,
         filename: file.originalname,
@@ -50,16 +64,16 @@ export class UploadController {
   async getImage(@Param('id') id: string, @Res() res: Response) {
     try {
       const image = await this.uploadService.getImageById(id);
-      
+
       if (!image) {
         return res.status(404).send('Imagem não encontrada');
       }
-      
+
       res.set({
         'Content-Type': image.mimetype,
         'Content-Disposition': `inline; filename="${image.filename}"`,
       });
-      
+
       return res.send(image.data);
     } catch (error) {
       console.error('Erro ao buscar imagem:', error);

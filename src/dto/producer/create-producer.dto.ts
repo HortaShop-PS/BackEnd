@@ -1,4 +1,10 @@
-import { IsEmail, IsOptional, IsString, MinLength, IsNotEmpty } from 'class-validator';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  MinLength,
+  IsNotEmpty,
+} from 'class-validator';
 
 export class CreateProducerDto {
   @IsString()

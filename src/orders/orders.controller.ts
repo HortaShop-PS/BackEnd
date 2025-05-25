@@ -1,9 +1,21 @@
-import { Controller, Get, Post, Body, Param, Patch, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Patch,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OrderStatus } from './entities/order.entity';
-import { OrderDetailResponseDto, OrderSummaryResponseDto } from './dto/order-response.dto';
+import {
+  OrderDetailResponseDto,
+  OrderSummaryResponseDto,
+} from './dto/order-response.dto';
 
 @Controller('orders')
 export class OrdersController {
@@ -23,7 +35,10 @@ export class OrdersController {
 
   @UseGuards(JwtAuthGuard)
   @Get(':orderId')
-  async getOrderById(@Request() req, @Param('orderId') orderId: string): Promise<OrderDetailResponseDto> {
+  async getOrderById(
+    @Request() req,
+    @Param('orderId') orderId: string,
+  ): Promise<OrderDetailResponseDto> {
     return this.ordersService.getOrderById(orderId, req.user.id);
   }
 
@@ -50,7 +65,10 @@ export class ProducerOrdersController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me/orders/:orderId')
-  async getProducerOrderById(@Request() req, @Param('orderId') orderId: string): Promise<OrderDetailResponseDto> {
+  async getProducerOrderById(
+    @Request() req,
+    @Param('orderId') orderId: string,
+  ): Promise<OrderDetailResponseDto> {
     return this.ordersService.getProducerOrderDetails(orderId, req.user.id);
   }
 }

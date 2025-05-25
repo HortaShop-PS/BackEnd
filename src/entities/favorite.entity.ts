@@ -1,9 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn, Unique } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+  Unique,
+} from 'typeorm';
 import { User } from './user.entity';
 import { Product } from '../products/product.entity';
 
 @Entity('favorites')
-@Unique(['user', 'product']) 
+@Unique(['user', 'product'])
 export class Favorite {
   @PrimaryGeneratedColumn('uuid')
   id: string;

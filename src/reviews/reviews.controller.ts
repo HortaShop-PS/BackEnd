@@ -1,7 +1,22 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards, Request, HttpCode, HttpStatus, ParseUUIDPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  UseGuards,
+  Request,
+  HttpCode,
+  HttpStatus,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
-import { ReviewResponseDto, ProductReviewsResponseDto } from './dto/review-response.dto';
+import {
+  ReviewResponseDto,
+  ProductReviewsResponseDto,
+} from './dto/review-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('reviews')

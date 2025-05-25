@@ -1,4 +1,10 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, IsOptional } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  IsOptional,
+} from 'class-validator';
 
 export class RegisterAuthDto {
   @IsNotEmpty({ message: 'O nome não pode estar vazio' })

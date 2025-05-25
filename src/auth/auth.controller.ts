@@ -1,4 +1,13 @@
-import { Controller, Post, Body, Request, UseGuards, Get, Req, Res, } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Request,
+  UseGuards,
+  Get,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -17,13 +26,13 @@ export class AuthController {
     // Adicionar log para verificar se o userType está sendo retornado
     console.log('Usuário autenticado:', {
       id: req.user.id,
-      userType: req.user.userType
+      userType: req.user.userType,
     });
-    
+
     return this.authService.login({
       ...req.user,
       // Garantir que userType está sendo passado corretamente
-      userType: req.user.userType || 'consumer'
+      userType: req.user.userType || 'consumer',
     });
   }
 
@@ -42,8 +51,7 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
-  async googleAuth() {
-  }
+  async googleAuth() {}
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))

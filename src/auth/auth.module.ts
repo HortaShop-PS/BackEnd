@@ -12,7 +12,7 @@ import { GoogleStrategy } from '../auth/strategies/google.strategy';
 @Module({
   imports: [
     UsersModule,
-    PassportModule, 
+    PassportModule,
     ConfigModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -24,12 +24,7 @@ import { GoogleStrategy } from '../auth/strategies/google.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    LocalStrategy,
-    JwtStrategy,
-    GoogleStrategy,
-  ],
+  providers: [AuthService, LocalStrategy, JwtStrategy, GoogleStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}

@@ -1,4 +1,9 @@
-import { Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  forwardRef,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Card } from './entities/card.entity';
@@ -28,9 +33,15 @@ export class PaymentsService {
     processPixPaymentDto: ProcessPixPaymentDto,
     userId: number, // Adicionado userId
   ): Promise<PixPaymentResponseDto> {
-    console.log(`Usuário ${userId} processando pagamento PIX para o pedido:`, processPixPaymentDto.orderId); // Log com userId
+    console.log(
+      `Usuário ${userId} processando pagamento PIX para o pedido:`,
+      processPixPaymentDto.orderId,
+    ); // Log com userId
     // Simulação do processamento de pagamento PIX
-    console.log('Processando pagamento PIX para o pedido:', processPixPaymentDto.orderId);
+    console.log(
+      'Processando pagamento PIX para o pedido:',
+      processPixPaymentDto.orderId,
+    );
     const qrCodeUrl = `https://example.com/pix/qr/${Date.now()}`;
     const copyPasteCode = `00020126330014br.gov.bcb.pix0111${Date.now()}0215${processPixPaymentDto.amount.toFixed(2).replace('.', '')}5204000053039865802BR5913Mocked Company6009SAO PAULO62070503***6304${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
     const expiresAt = new Date(Date.now() + 3600 * 1000); // Expira em uma hora
@@ -38,7 +49,9 @@ export class PaymentsService {
     // Após o pagamento PIX bem-sucedido (simulado)
     await this.cartService.clearCart(userId);
     // Aqui você adicionaria a lógica para atualizar o estoque de produtos, se necessário
-    await this.productService.decreaseStock(String(processPixPaymentDto.orderId));
+    await this.productService.decreaseStock(
+      String(processPixPaymentDto.orderId),
+    );
 
     return {
       qrCodeUrl,
@@ -52,9 +65,15 @@ export class PaymentsService {
     processCardPaymentDto: ProcessCardPaymentDto,
     userId: number, // Adicionado userId
   ): Promise<CardPaymentResponseDto> {
-    console.log(`Usuário ${userId} processando pagamento com cartão para o pedido:`, processCardPaymentDto.orderId); // Log com userId
+    console.log(
+      `Usuário ${userId} processando pagamento com cartão para o pedido:`,
+      processCardPaymentDto.orderId,
+    ); // Log com userId
     // Simulação do processamento de pagamento com cartão
-    console.log('Processando pagamento com cartão para o pedido:', processCardPaymentDto.orderId);
+    console.log(
+      'Processando pagamento com cartão para o pedido:',
+      processCardPaymentDto.orderId,
+    );
     const transactionId = `txn_${Date.now()}`;
     const status = 'approved'; // ou 'declined', 'pending'
 
@@ -62,7 +81,9 @@ export class PaymentsService {
     if (status === 'approved') {
       await this.cartService.clearCart(userId);
       // Aqui você adicionaria a lógica para atualizar o estoque de produtos, se necessário
-      await this.productService.decreaseStock(String(processCardPaymentDto.orderId));
+      await this.productService.decreaseStock(
+        String(processCardPaymentDto.orderId),
+      );
     }
 
     return {
@@ -76,7 +97,10 @@ export class PaymentsService {
     updatePaymentStatusDto: UpdatePaymentStatusDto,
     userId: number, // Adicionado userId
   ): { message: string; status: string } {
-    console.log(`Usuário ${userId} atualizando status do pagamento para o ID:`, updatePaymentStatusDto.paymentId); // Log com userId
+    console.log(
+      `Usuário ${userId} atualizando status do pagamento para o ID:`,
+      updatePaymentStatusDto.paymentId,
+    ); // Log com userId
     // Simulação da atualização do status do pagamento
     console.log(
       'Atualizando status do pagamento para o ID:',
@@ -91,8 +115,19 @@ export class PaymentsService {
   }
 
   // Métodos de Gerenciamento de Cartão
-  async createCard(createCardDto: CreateCardDto, userId: number): Promise<Card> {
-    const { number, expiry, brand: brandFromDto, cardholderName, nickname, paymentMethodType, ...restOfDto } = createCardDto;
+  async createCard(
+    createCardDto: CreateCardDto,
+    userId: number,
+  ): Promise<Card> {
+    const {
+      number,
+      expiry,
+      brand: brandFromDto,
+      cardholderName,
+      nickname,
+      paymentMethodType,
+      ...restOfDto
+    } = createCardDto;
     const [expiryMonth, expiryYear] = expiry.split('/');
 
     // Detecção simplificada da bandeira se não vier do DTO, ou usa o do DTO
@@ -130,19 +165,37 @@ export class PaymentsService {
   async findCardById(id: string, userId: number): Promise<Card> {
     const card = await this.cardRepository.findOne({ where: { id, userId } });
     if (!card) {
-      throw new NotFoundException(`Cartão com ID "${id}" não encontrado para este usuário.`);
+      throw new NotFoundException(
+        `Cartão com ID "${id}" não encontrado para este usuário.`,
+      );
     }
     return card;
   }
 
   // Atualiza os dados de um cartão existente
-  async updateCard(userId: number, cardId: string, updateCardDto: UpdateCardDto): Promise<Card> {
-    const card = await this.cardRepository.findOne({ where: { id: cardId, userId } });
+  async updateCard(
+    userId: number,
+    cardId: string,
+    updateCardDto: UpdateCardDto,
+  ): Promise<Card> {
+    const card = await this.cardRepository.findOne({
+      where: { id: cardId, userId },
+    });
     if (!card) {
-      throw new NotFoundException(`Cartão com ID ${cardId} não encontrado para este usuário.`);
+      throw new NotFoundException(
+        `Cartão com ID ${cardId} não encontrado para este usuário.`,
+      );
     }
 
-    const { number, expiry, cardholderName, brand, isPrincipal, nickname, paymentMethodType } = updateCardDto;
+    const {
+      number,
+      expiry,
+      cardholderName,
+      brand,
+      isPrincipal,
+      nickname,
+      paymentMethodType,
+    } = updateCardDto;
 
     const updatePayload: Partial<Card> = {};
 
@@ -152,7 +205,8 @@ export class PaymentsService {
     if (brand) {
       updatePayload.brand = brand; // Bandeira do cartão
     }
-    if (nickname !== undefined) { // Permite limpar o nickname passando null ou string vazia se desejado, ou atualizar
+    if (nickname !== undefined) {
+      // Permite limpar o nickname passando null ou string vazia se desejado, ou atualizar
       updatePayload.nickname = nickname;
     }
     if (paymentMethodType) {
@@ -164,7 +218,7 @@ export class PaymentsService {
         // Desmarca todos os outros cartões do usuário
         await this.cardRepository.update(
           { userId, isPrincipal: true },
-          { isPrincipal: false }
+          { isPrincipal: false },
         );
         updatePayload.isPrincipal = true;
       } else {
@@ -200,7 +254,9 @@ export class PaymentsService {
     const card = await this.findCardById(id, userId); // Garante que o cartão existe e pertence ao usuário
     const result = await this.cardRepository.delete({ id, userId });
     if (result.affected === 0) {
-      throw new NotFoundException(`Cartão com ID "${id}" não encontrado ou já foi deletado.`);
+      throw new NotFoundException(
+        `Cartão com ID "${id}" não encontrado ou já foi deletado.`,
+      );
     }
   }
 }

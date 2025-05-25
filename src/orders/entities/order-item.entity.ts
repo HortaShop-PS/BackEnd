@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Order } from './order.entity';
 import { Product } from '../../products/product.entity';
 import { Producer } from '../../entities/producer.entity';
@@ -9,7 +16,7 @@ export class OrderItem {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Order, order => order.items)
+  @ManyToOne(() => Order, (order) => order.items)
   @JoinColumn()
   order: Order;
 
@@ -39,6 +46,6 @@ export class OrderItem {
   @Column({ nullable: true })
   notes: string;
 
-  @OneToOne(() => Review, review => review.orderItem)
+  @OneToOne(() => Review, (review) => review.orderItem)
   review: Review;
 }

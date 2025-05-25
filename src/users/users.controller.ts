@@ -1,6 +1,22 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Request, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto, UpdateUserDto, UpdatePasswordDto, UserResponseDto } from '../dto/user.dto';
+import {
+  CreateUserDto,
+  UpdateUserDto,
+  UpdatePasswordDto,
+  UserResponseDto,
+} from '../dto/user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('users')
@@ -22,7 +38,9 @@ export class UsersController {
   @Get(':id')
   findOne(@Param('id') id: string, @Request() req): Promise<UserResponseDto> {
     if (req.user.id !== +id) {
-      throw new UnauthorizedException('Você só pode acessar seu próprio perfil');
+      throw new UnauthorizedException(
+        'Você só pode acessar seu próprio perfil',
+      );
     }
     return this.usersService.findOne(+id);
   }
@@ -35,7 +53,9 @@ export class UsersController {
     @Request() req,
   ): Promise<UserResponseDto> {
     if (req.user.id !== +id) {
-      throw new UnauthorizedException('Você só pode atualizar seu próprio perfil');
+      throw new UnauthorizedException(
+        'Você só pode atualizar seu próprio perfil',
+      );
     }
     return this.usersService.update(+id, updateUserDto);
   }
@@ -48,7 +68,9 @@ export class UsersController {
     @Request() req,
   ): Promise<{ message: string }> {
     if (req.user.id !== +id) {
-      throw new UnauthorizedException('Você só pode atualizar sua própria senha');
+      throw new UnauthorizedException(
+        'Você só pode atualizar sua própria senha',
+      );
     }
     return this.usersService
       .updatePassword(+id, updatePasswordDto)
@@ -57,9 +79,14 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string, @Request() req): Promise<{ message: string }> {
+  remove(
+    @Param('id') id: string,
+    @Request() req,
+  ): Promise<{ message: string }> {
     if (req.user.id !== +id) {
-      throw new UnauthorizedException('Você só pode remover seu próprio perfil');
+      throw new UnauthorizedException(
+        'Você só pode remover seu próprio perfil',
+      );
     }
     return this.usersService.remove(+id);
   }

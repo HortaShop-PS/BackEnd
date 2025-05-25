@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Favorite } from '../entities/favorite.entity';
@@ -22,7 +26,9 @@ export class FavoritesService {
       throw new NotFoundException(`Usuário com ID ${userId} não encontrado`);
     }
 
-    const product = await this.productsRepository.findOne({ where: { id: productId } });
+    const product = await this.productsRepository.findOne({
+      where: { id: productId },
+    });
     if (!product) {
       throw new NotFoundException(`Produto com ID ${productId} não encontrado`);
     }
@@ -36,7 +42,9 @@ export class FavoritesService {
     });
 
     if (existingFavorite) {
-      throw new ConflictException('Este produto já está nos favoritos do usuário');
+      throw new ConflictException(
+        'Este produto já está nos favoritos do usuário',
+      );
     }
 
     const favorite = this.favoritesRepository.create({

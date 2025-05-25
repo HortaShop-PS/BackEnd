@@ -1,4 +1,18 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Get, Param, Patch, Delete, UseGuards, Request, ParseUUIDPipe, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Get,
+  Param,
+  Patch,
+  Delete,
+  UseGuards,
+  Request,
+  ParseUUIDPipe,
+  Req,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
@@ -37,7 +51,10 @@ export class PaymentsController {
     @Request() req,
   ): Promise<CardPaymentResponseDto> {
     const userId = req.user.id;
-    return this.paymentsService.processCardPayment(processCardPaymentDto, userId);
+    return this.paymentsService.processCardPayment(
+      processCardPaymentDto,
+      userId,
+    );
   }
 
   // Endpoint para atualizar o status de um pagamento
@@ -49,7 +66,10 @@ export class PaymentsController {
     @Request() req,
   ): Promise<{ message: string; status: string }> {
     const userId = req.user.id;
-    return this.paymentsService.updatePaymentStatus(updatePaymentStatusDto, userId);
+    return this.paymentsService.updatePaymentStatus(
+      updatePaymentStatusDto,
+      userId,
+    );
   }
 
   // --- Gerenciamento de Cartões ---
@@ -58,9 +78,12 @@ export class PaymentsController {
   @UseGuards(AuthGuard('jwt')) // Protegendo a rota
   @Post('cards')
   @HttpCode(HttpStatus.CREATED)
-  async createCard(@Body() createCardDto: CreateCardDto, @Request() req): Promise<Card> {
+  async createCard(
+    @Body() createCardDto: CreateCardDto,
+    @Request() req,
+  ): Promise<Card> {
     // Obtém o ID do usuário autenticado
-    const userId = req.user.id; 
+    const userId = req.user.id;
     return this.paymentsService.createCard(createCardDto, userId);
   }
 
@@ -75,7 +98,10 @@ export class PaymentsController {
   // Endpoint para buscar um cartão específico pelo ID (do usuário autenticado)
   @UseGuards(AuthGuard('jwt'))
   @Get('cards/:id')
-  async findCardById(@Param('id', ParseUUIDPipe) id: string, @Request() req): Promise<Card> {
+  async findCardById(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Request() req,
+  ): Promise<Card> {
     const userId = req.user.id;
     return this.paymentsService.findCardById(id, userId);
   }
@@ -99,7 +125,10 @@ export class PaymentsController {
   @UseGuards(AuthGuard('jwt'))
   @Delete('cards/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async removeCard(@Param('id', ParseUUIDPipe) id: string, @Request() req): Promise<void> {
+  async removeCard(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Request() req,
+  ): Promise<void> {
     const userId = req.user.id;
     return this.paymentsService.removeCard(id, userId);
   }

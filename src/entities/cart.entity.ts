@@ -23,7 +23,7 @@ export class Cart {
   @Column({ name: 'user_id' })
   userId: number;
 
-  @OneToMany(() => CartItem, cartItem => cartItem.cart, { cascade: true })
+  @OneToMany(() => CartItem, (cartItem) => cartItem.cart, { cascade: true })
   items: CartItem[];
 
   @CreateDateColumn({ name: 'created_at' })

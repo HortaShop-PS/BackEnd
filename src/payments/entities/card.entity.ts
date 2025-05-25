@@ -1,5 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { User } from '../../entities/user.entity'; 
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { User } from '../../entities/user.entity';
 
 @Entity('cards')
 export class Card {
@@ -30,7 +38,6 @@ export class Card {
 
   @Column()
   // cardType: string; // Removido: 'debit' or 'credit' - Usar paymentMethodType
-
   @Column({ nullable: true }) // Adicionando nickname como opcional
   nickname: string;
 

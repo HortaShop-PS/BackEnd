@@ -1,11 +1,21 @@
-import { IsString, IsNotEmpty, Length, Matches, IsNumber, ValidateNested, Min } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  Length,
+  Matches,
+  IsNumber,
+  ValidateNested,
+  Min,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CardDetailsDto {
   @IsString()
   @IsNotEmpty()
   @Length(13, 19)
-  @Matches(/^[0-9]+$/, { message: 'Número do cartão deve conter apenas dígitos' })
+  @Matches(/^[0-9]+$/, {
+    message: 'Número do cartão deve conter apenas dígitos',
+  })
   number: string;
 
   @IsString()

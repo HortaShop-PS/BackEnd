@@ -1,4 +1,11 @@
-import { IsString, IsBoolean, IsOptional, IsNumber, IsUrl, IsEnum } from 'class-validator'
+import {
+  IsString,
+  IsBoolean,
+  IsOptional,
+  IsNumber,
+  IsUrl,
+  IsEnum,
+} from 'class-validator';
 
 export enum CategoryEnum {
   VEGETAIS = 'Vegetais',
@@ -10,7 +17,7 @@ export enum CategoryEnum {
   TEMPEROS = 'Temperos',
   BEBIDAS = 'Bebidas',
   DOCES = 'Doces',
-  OUTROS = 'Outros'
+  OUTROS = 'Outros',
 }
 
 export class CreateProductDto {
@@ -26,7 +33,9 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsString()
-  @IsEnum(CategoryEnum, { message: 'Categoria inválida. Escolha uma das opções válidas.' })
+  @IsEnum(CategoryEnum, {
+    message: 'Categoria inválida. Escolha uma das opções válidas.',
+  })
   category?: CategoryEnum;
 
   @IsNumber()

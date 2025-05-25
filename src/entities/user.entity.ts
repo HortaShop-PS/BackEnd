@@ -36,9 +36,9 @@ export class User {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @OneToOne(() => Producer, producer => producer.user)
+  @OneToOne(() => Producer, (producer) => producer.user)
   producer?: Producer;
 
-  @OneToMany(() => Review, review => review.user)
+  @OneToMany(() => Review, (review) => review.user)
   reviews: Review[];
 }

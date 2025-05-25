@@ -46,9 +46,9 @@ export class UserResponseDto {
   phone?: string;
   userType: string;
   producer?: {
-      id?: number;
-      farmName?: string;
-      cnpj?: string;
+    id?: number;
+    farmName?: string;
+    cnpj?: string;
   };
   createdAt: Date;
   updatedAt: Date;
