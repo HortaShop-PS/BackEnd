@@ -22,7 +22,7 @@ export class UpdateCardDto {
 
   @IsOptional()
   @IsString()
-  cardType?: string;
+  brand?: string;
 
   @IsOptional()
   @IsBoolean()

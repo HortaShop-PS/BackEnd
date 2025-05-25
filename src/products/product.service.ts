@@ -159,4 +159,26 @@ async getAllProducts(): Promise<Product[]> {
     throw error;
   }
 }
+
+async decreaseStock(orderId: string): Promise<void> {
+  // In a real application, you would fetch order details to get products and quantities
+  // For now, let's assume an order has a direct relation to products or a list of product IDs and quantities
+  // This is a simplified example: decrement stock for a product associated with the order.
+  // You'll need to adapt this based on your actual Order entity and relations.
+  console.log(`Decreasing stock for order ${orderId}`);
+  // Example: find a product related to the order and decrease its stock
+  // const order = await this.orderRepository.findOne({ where: { id: orderId }, relations: ["items", "items.product"] });
+  // if (order && order.items) {
+  //   for (const item of order.items) {
+  //     const product = await this.repo.findOneBy({ id: item.productId });
+  //     if (product && product.stock >= item.quantity) {
+  //       product.stock -= item.quantity;
+  //       await this.repo.save(product);
+  //     } else if (product) {
+  //       console.warn(`Not enough stock for product ${product.id} to fulfill order ${orderId}`);
+  //       // Handle insufficient stock (e.g., throw error, notify admin)
+  //     }
+  //   }
+  // }
+}
 }

@@ -9,7 +9,7 @@ export class CreateCardDto {
 
   @IsString()
   @IsNotEmpty()
-  name: string;
+  cardholderName: string;
 
   @IsString()
   @IsNotEmpty()
@@ -26,8 +26,8 @@ export class CreateCardDto {
 
   @IsString()
   @IsNotEmpty()
-  // TODO: Considerar usar um enum para cardType ('débito', 'crédito') para melhor segurança de tipo
-  cardType: string; 
+  // TODO: Considerar usar um enum para brand ('visa', 'mastercard') para melhor segurança de tipo
+  brand: string; 
 
   @IsString()
   @IsOptional()

@@ -39,6 +39,9 @@ export class Product {
   @Column({ nullable: true })
   origin?: string;
 
+  @Column({ type: 'int', default: 0 }) // Add stock field
+  stock: number;
+
   @ManyToOne(() => Producer, (producer) => producer.products)
   @JoinColumn({ name: 'producer_id' })
   producer: Producer;

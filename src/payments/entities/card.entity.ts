@@ -29,15 +29,15 @@ export class Card {
   cardholderName: string;
 
   @Column()
-  cardType: string; // 'debit' or 'credit'
+  // cardType: string; // Removido: 'debit' or 'credit' - Usar paymentMethodType
 
   @Column({ nullable: true }) // Adicionando nickname como opcional
   nickname: string;
 
-  @Column({ default: 'credit' }) // Adicionando paymentMethodType com valor padrão 'credit'
+  @Column({ default: 'credit' }) // paymentMethodType com valor padrão 'credit'
   paymentMethodType: string; // 'credit' or 'debit'
 
-  @Column({ default: false }) // Adicionando isPrincipal com valor padrão false
+  @Column({ default: false }) // isPrincipal com valor padrão false
   isPrincipal: boolean;
 
   // O CVV não deve ser armazenado por razões de segurança.
