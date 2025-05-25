@@ -47,4 +47,10 @@ export class ProducerOrdersController {
     // Adicionar validação de usuário produtor
     return this.ordersService.getOrdersByProducerId(req.user.id);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me/orders/:orderId')
+  async getProducerOrderById(@Request() req, @Param('orderId') orderId: string): Promise<OrderDetailResponseDto> {
+    return this.ordersService.getProducerOrderDetails(orderId, req.user.id);
+  }
 }

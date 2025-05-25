@@ -5,8 +5,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToOne,
+  OneToMany,
 } from 'typeorm';
 import { Producer } from './producer.entity';
+import { Review } from '../reviews/entities/review.entity';
 
 @Entity('users')
 export class User {
@@ -36,4 +38,7 @@ export class User {
 
   @OneToOne(() => Producer, producer => producer.user)
   producer?: Producer;
+
+  @OneToMany(() => Review, review => review.user)
+  reviews: Review[];
 }

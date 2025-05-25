@@ -22,10 +22,12 @@ export class ProductController {
       unit: p.unit,
       imageUrl: p.imageUrl,
       isNew: p.isNew,
-      isFeatured: p.isFeatured, // Add this line
+      isFeatured: p.isFeatured,
       category: p.category,
       isOrganic: p.isOrganic,
-      origin: p.origin
+      origin: p.origin,
+      averageRating: p.averageRating,
+      totalReviews: p.totalReviews
     }));
   }
 
@@ -60,10 +62,12 @@ export class ProductController {
       unit: p.unit,
       imageUrl: p.imageUrl,
       isNew: p.isNew,
-      isFeatured: p.isFeatured, // Add this line
+      isFeatured: p.isFeatured,
       category: p.category,
       isOrganic: p.isOrganic,
-      origin: p.origin
+      origin: p.origin,
+      averageRating: p.averageRating,
+      totalReviews: p.totalReviews
     }));
   }
 
@@ -78,11 +82,13 @@ export class ProductController {
       unit: p.unit,
       imageUrl: p.imageUrl,
       isNew: p.isNew,
-      isFeatured: p.isFeatured, // Adicionado esta linha
+      isFeatured: p.isFeatured,
       category: p.category,
       isOrganic: p.isOrganic,
       origin: p.origin,
-      description: p.description
+      description: p.description,
+      averageRating: p.averageRating,
+      totalReviews: p.totalReviews
     }));
   }
 
@@ -97,9 +103,13 @@ export class ProductController {
       unit: product.unit,
       imageUrl: product.imageUrl,
       isNew: product.isNew,
-      isFeatured: product.isFeatured, // Adicionado esta linha
+      isFeatured: product.isFeatured,
       category: product.category,
-      isOrganic: product.isOrganic
+      isOrganic: product.isOrganic,
+      origin: product.origin,
+      description: product.description,
+      averageRating: product.averageRating,
+      totalReviews: product.totalReviews
     };
   }
 
@@ -135,9 +145,12 @@ export class ProductController {
       unit: p.unit,
       imageUrl: p.imageUrl,
       isNew: p.isNew,
-      isFeatured: p.isFeatured, // Adicionado esta linha
+      isFeatured: p.isFeatured,
       category: p.category,
-      isOrganic: p.isOrganic
+      isOrganic: p.isOrganic,
+      origin: p.origin,
+      averageRating: p.averageRating,
+      totalReviews: p.totalReviews
     }));
   }
 }

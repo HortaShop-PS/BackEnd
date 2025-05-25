@@ -11,6 +11,7 @@ export class OrderItemResponseDto {
   producerId: number;
   producerName: string;
   notes?: string;
+  reviewed?: boolean;
 }
 
 export class OrderSummaryResponseDto {
@@ -20,6 +21,7 @@ export class OrderSummaryResponseDto {
   createdAt: Date;
   updatedAt: Date;
   itemCount: number;
+  items?: OrderItemResponseDto[];
 }
 
 export class OrderDetailResponseDto {
