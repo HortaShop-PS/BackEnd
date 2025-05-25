@@ -9,6 +9,7 @@ import { ProducerModule } from './dto/producer/producer.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { UploadModule } from './upload/upload.module';
 import { CartModule } from './cart/cart.module';
+import { PaymentsModule } from './payments/payments.module';
 import { OrdersModule } from './orders/orders.module';
 import { ReviewsModule } from './reviews/reviews.module';
 
@@ -39,6 +40,7 @@ import { ReviewsModule } from './reviews/reviews.module';
     FavoritesModule,
     UploadModule,
     CartModule,
+    PaymentsModule,
     OrdersModule,
     ReviewsModule,
   ],
