@@ -37,9 +37,25 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsNumber()
-  quantity?: number;
+  stock?: number;
 
   @IsOptional()
   @IsString()
   imageUrl?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isFeatured?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isNew?: boolean;
+
+  @IsOptional()
+  @IsString()
+  origin?: string;
+
+  @IsOptional()
+  @IsString()
+  harvestSeason?: string;
 }
