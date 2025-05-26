@@ -1,39 +1,31 @@
-import { IsString, IsBoolean, IsOptional, IsNumber, IsUrl, IsEnum } from 'class-validator'
+import { IsString, IsBoolean, IsOptional, IsNumber, IsEnum } from 'class-validator';
+import { CategoryEnum } from './create-product.dto';
 
-export enum CategoryEnum {
-  VEGETAIS = 'Vegetais',
-  FRUTAS = 'Frutas',
-  ORGANICOS = 'Orgânicos',
-  LATICINIOS = 'Laticínios',
-  EMBUTIDOS = 'Embutidos',
-  GRAOS = 'Grãos',
-  TEMPEROS = 'Temperos',
-  BEBIDAS = 'Bebidas',
-  DOCES = 'Doces',
-  OUTROS = 'Outros'
-}
-
-export class CreateProductDto {
+export class UpdateProductDto {
+  @IsOptional()
   @IsString()
-  name: string;
+  name?: string;
 
   @IsOptional()
   @IsString()
   description?: string;
 
+  @IsOptional()
   @IsBoolean()
-  isOrganic: boolean;
+  isOrganic?: boolean;
 
   @IsOptional()
   @IsString()
   @IsEnum(CategoryEnum, { message: 'Categoria inválida. Escolha uma das opções válidas.' })
   category?: CategoryEnum;
 
+  @IsOptional()
   @IsNumber()
-  price: number;
+  price?: number;
 
+  @IsOptional()
   @IsString()
-  unit: string;
+  unit?: string;
 
   @IsOptional()
   @IsNumber()

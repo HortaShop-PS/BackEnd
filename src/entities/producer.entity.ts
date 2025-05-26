@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany, JoinColumn } from 'typeorm';
 import { User } from './user.entity';
+import { Product } from '../products/product.entity';
 
 @Entity('producers')
 export class Producer {
@@ -33,5 +34,7 @@ export class Producer {
 
   @Column()
   userId: number;
-  products: any;
+
+  @OneToMany(() => Product, product => product.producer)
+  products: Product[];
 }

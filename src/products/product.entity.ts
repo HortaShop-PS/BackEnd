@@ -1,5 +1,5 @@
 import { Producer } from 'src/entities/producer.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { Review } from '../reviews/entities/review.entity';
 
 @Entity()
@@ -15,6 +15,9 @@ export class Product {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @Column()
   unit: string;
@@ -40,7 +43,7 @@ export class Product {
   @Column({ nullable: true })
   origin?: string;
 
-  @Column({ type: 'int', default: 0 }) // Add stock field
+  @Column({ type: 'int', default: 0 })
   stock: number;
 
   @ManyToOne(() => Producer, (producer) => producer.products)

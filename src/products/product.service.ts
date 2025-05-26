@@ -1,8 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, Between, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
 import { Product } from './product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { ProductResponseDto } from './dto/product-response.dto';
 import { Producer } from 'src/entities/producer.entity';
 import { Review } from '../reviews/entities/review.entity';
 
@@ -177,29 +179,117 @@ async createProduct(createProductDto: CreateProductDto & { producerId: number })
   return product;
 }
 
-async getProductsByProducerId(producerId: number): Promise<(Product & { averageRating?: number; totalReviews?: number })[]> {
-  try {
+  private mapToResponseDto(product: Product): ProductResponseDto {
+    return {
+      id: product.id,
+      name: product.name,
+      price: Number(product.price),
+      unit: product.unit,
+      imageUrl: product.imageUrl,
+      isNew: product.isNew,
+      isFeatured: product.isFeatured,
+      category: product.category,
+      isOrganic: product.isOrganic,
+      origin: product.origin,
+      description: product.description,
+      stock: product.stock,
+      harvestSeason: product.harvestSeason
+    };
+  }
+
+  private async mapToResponseDtoWithReviews(product: Product & { averageRating?: number; totalReviews?: number }): Promise<ProductResponseDto> {
+    return {
+      id: product.id,
+      name: product.name,
+      price: Number(product.price),
+      unit: product.unit,
+      imageUrl: product.imageUrl,
+      isNew: product.isNew,
+      isFeatured: product.isFeatured,
+      category: product.category,
+      isOrganic: product.isOrganic,
+      origin: product.origin,
+      description: product.description,
+      stock: product.stock,
+      harvestSeason: product.harvestSeason,
+      averageRating: product.averageRating,
+      totalReviews: product.totalReviews
+    };
+  }
+
+  private async findProductByIdAndProducerId(productId: string, userId: number): Promise<Product> {
     const producerRepo = this.repo.manager.getRepository(Producer);
     const producer = await producerRepo.findOne({
-      where: { userId: producerId }
+      where: { userId }
     });
 
     if (!producer) {
-      throw new NotFoundException(`Produtor com userId ${producerId} não encontrado`);
+      throw new NotFoundException(`Produtor não encontrado para o usuário ${userId}`);
+    }
+
+    const product = await this.repo.findOne({
+      where: { 
+        id: productId,
+        producer: { id: producer.id }
+      },
+      relations: ['producer']
+    });
+
+    if (!product) {
+      throw new NotFoundException(`Produto com ID ${productId} não encontrado ou não pertence ao produtor`);
+    }
+
+    return product;
+  }
+
+  async createProductForProducer(createProductDto: CreateProductDto, userId: number): Promise<ProductResponseDto> {
+    const producerRepo = this.repo.manager.getRepository(Producer);
+    const producer = await producerRepo.findOne({
+      where: { userId }
+    });
+
+    if (!producer) {
+      throw new NotFoundException(`Produtor não encontrado para o usuário ${userId}`);
+    }
+
+    const product = this.repo.create({
+      ...createProductDto,
+      producer: { id: producer.id }
+    });
+
+    const savedProduct = await this.repo.save(product);
+    
+    // Produto novo não tem reviews ainda
+    const productWithReviews = {
+      ...savedProduct,
+      averageRating: 0,
+      totalReviews: 0
+    };
+    
+    return this.mapToResponseDtoWithReviews(productWithReviews);
+  }
+
+  async getProductsByProducerId(userId: number): Promise<ProductResponseDto[]> {
+    const producerRepo = this.repo.manager.getRepository(Producer);
+    const producer = await producerRepo.findOne({
+      where: { userId }
+    });
+
+    if (!producer) {
+      throw new NotFoundException(`Produtor não encontrado para o usuário ${userId}`);
     }
 
     const products = await this.repo.find({
       where: { 
         producer: { id: producer.id } 
       },
-      order: { createdAt: 'DESC' } as any
+      order: { createdAt: 'DESC' }
     });
-    
-    // Buscar avaliações para todos os produtos
+
+    // Mapear produtos com reviews
     const productsWithReviews = await Promise.all(products.map(async (product) => {
       const reviews = await this.reviewRepo.find({ where: { productId: product.id } });
       
-      // Calcular média de avaliações
       const totalReviews = reviews.length;
       const averageRating = totalReviews > 0
         ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
@@ -211,15 +301,64 @@ async getProductsByProducerId(producerId: number): Promise<(Product & { averageR
         totalReviews
       };
     }));
-    
-    return productsWithReviews;
-  } catch (error) {
-    console.error('Erro ao buscar produtos do produtor:', error);
-    throw error;
-  }
-}
 
-async getAllProducts(): Promise<(Product & { averageRating?: number; totalReviews?: number })[]> {
+    return Promise.all(productsWithReviews.map(p => this.mapToResponseDtoWithReviews(p)));
+  }
+
+  async getProductByIdForProducer(productId: string, userId: number): Promise<ProductResponseDto> {
+    const product = await this.findProductByIdAndProducerId(productId, userId);
+    
+    // Buscar reviews para este produto
+    const reviews = await this.reviewRepo.find({ where: { productId: product.id } });
+    
+    const totalReviews = reviews.length;
+    const averageRating = totalReviews > 0
+      ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
+      : 0;
+
+    const productWithReviews = {
+      ...product,
+      averageRating,
+      totalReviews
+    };
+
+    return this.mapToResponseDtoWithReviews(productWithReviews);
+  }
+
+  async updateProductForProducer(
+    productId: string, 
+    updateProductDto: UpdateProductDto, 
+    userId: number
+  ): Promise<ProductResponseDto> {
+    const product = await this.findProductByIdAndProducerId(productId, userId);
+
+    Object.assign(product, updateProductDto);
+    
+    const updatedProduct = await this.repo.save(product);
+    
+    // Buscar reviews para o produto atualizado
+    const reviews = await this.reviewRepo.find({ where: { productId: updatedProduct.id } });
+    
+    const totalReviews = reviews.length;
+    const averageRating = totalReviews > 0
+      ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
+      : 0;
+
+    const productWithReviews = {
+      ...updatedProduct,
+      averageRating,
+      totalReviews
+    };
+
+    return this.mapToResponseDtoWithReviews(productWithReviews);
+  }
+
+  async deleteProductForProducer(productId: string, userId: number): Promise<void> {
+    const product = await this.findProductByIdAndProducerId(productId, userId);
+    await this.repo.remove(product);
+  }
+
+  async getAllProducts(): Promise<(Product & { averageRating?: number; totalReviews?: number })[]> {
   try {
     const products = await this.repo.find({
       order: { createdAt: 'DESC' },
