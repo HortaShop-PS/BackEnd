@@ -160,24 +160,23 @@ export class ProductService {
     return productsWithReviews;
   }
 
+  async createProduct(createProductDto: CreateProductDto & { producerId: number }) {
+    const producerRepo = this.repo.manager.getRepository(Producer);
+    const producer = await producerRepo.findOne({
+      where: { userId: createProductDto.producerId }
+    });
 
-async createProduct(createProductDto: CreateProductDto & { producerId: number }) {
-  const producerRepo = this.repo.manager.getRepository(Producer);
-  const producer = await producerRepo.findOne({
-    where: { userId: createProductDto.producerId }
-  });
+    if (!producer) {
+      throw new NotFoundException(`Produtor com userId ${createProductDto.producerId} não encontrado`);
+    }
 
-  if (!producer) {
-    throw new NotFoundException(`Produtor com userId ${createProductDto.producerId} não encontrado`);
+    const product = this.repo.create({
+        ...createProductDto,
+        producer: { id: producer.id }
+    });
+    await this.repo.save(product);
+    return product;
   }
-
-  const product = this.repo.create({
-      ...createProductDto,
-      producer: { id: producer.id }
-  });
-  await this.repo.save(product);
-  return product;
-}
 
   private mapToResponseDto(product: Product): ProductResponseDto {
     return {
@@ -359,55 +358,55 @@ async createProduct(createProductDto: CreateProductDto & { producerId: number })
   }
 
   async getAllProducts(): Promise<(Product & { averageRating?: number; totalReviews?: number })[]> {
-  try {
-    const products = await this.repo.find({
-      order: { createdAt: 'DESC' },
-      relations: ['producer']
-    });
-    
-    // Buscar avaliações para todos os produtos
-    const productsWithReviews = await Promise.all(products.map(async (product) => {
-      const reviews = await this.reviewRepo.find({ where: { productId: product.id } });
+    try {
+      const products = await this.repo.find({
+        order: { createdAt: 'DESC' },
+        relations: ['producer']
+      });
       
-      // Calcular média de avaliações
-      const totalReviews = reviews.length;
-      const averageRating = totalReviews > 0
-        ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
-        : 0;
+      // Buscar avaliações para todos os produtos
+      const productsWithReviews = await Promise.all(products.map(async (product) => {
+        const reviews = await this.reviewRepo.find({ where: { productId: product.id } });
+        
+        // Calcular média de avaliações
+        const totalReviews = reviews.length;
+        const averageRating = totalReviews > 0
+          ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
+          : 0;
+        
+        return {
+          ...product,
+          averageRating,
+          totalReviews
+        };
+      }));
       
-      return {
-        ...product,
-        averageRating,
-        totalReviews
-      };
-    }));
-    
-    return productsWithReviews;
-  } catch (error) {
-    console.error('Erro ao buscar todos os produtos:', error);
-    throw error;
+      return productsWithReviews;
+    } catch (error) {
+      console.error('Erro ao buscar todos os produtos:', error);
+      throw error;
+    }
   }
-}
 
-async decreaseStock(orderId: string): Promise<void> {
-  // In a real application, you would fetch order details to get products and quantities
-  // For now, let's assume an order has a direct relation to products or a list of product IDs and quantities
-  // This is a simplified example: decrement stock for a product associated with the order.
-  // You'll need to adapt this based on your actual Order entity and relations.
-  console.log(`Decreasing stock for order ${orderId}`);
-  // Example: find a product related to the order and decrease its stock
-  // const order = await this.orderRepository.findOne({ where: { id: orderId }, relations: ["items", "items.product"] });
-  // if (order && order.items) {
-  //   for (const item of order.items) {
-  //     const product = await this.repo.findOneBy({ id: item.productId });
-  //     if (product && product.stock >= item.quantity) {
-  //       product.stock -= item.quantity;
-  //       await this.repo.save(product);
-  //     } else if (product) {
-  //       console.warn(`Not enough stock for product ${product.id} to fulfill order ${orderId}`);
-  //       // Handle insufficient stock (e.g., throw error, notify admin)
-  //     }
-  //   }
-  // }
-}
+  async decreaseStock(orderId: string): Promise<void> {
+    // In a real application, you would fetch order details to get products and quantities
+    // For now, let's assume an order has a direct relation to products or a list of product IDs and quantities
+    // This is a simplified example: decrement stock for a product associated with the order.
+    // You'll need to adapt this based on your actual Order entity and relations.
+    console.log(`Decreasing stock for order ${orderId}`);
+    // Example: find a product related to the order and decrease its stock
+    // const order = await this.orderRepository.findOne({ where: { id: orderId }, relations: ["items", "items.product"] });
+    // if (order && order.items) {
+    //   for (const item of order.items) {
+    //     const product = await this.repo.findOneBy({ id: item.productId });
+    //     if (product && product.stock >= item.quantity) {
+    //       product.stock -= item.quantity;
+    //       await this.repo.save(product);
+    //     } else if (product) {
+    //       console.warn(`Not enough stock for product ${product.id} to fulfill order ${orderId}`);
+    //       // Handle insufficient stock (e.g., throw error, notify admin)
+    //     }
+    //   }
+    // }
+  }
 }
