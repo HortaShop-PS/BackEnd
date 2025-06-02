@@ -27,7 +27,7 @@ export class AddressesService {
     let coordinates: { lat: number; lng: number } | null = null;
     let formattedAddress: string | null = null;
 
-    if (!createAddressDto.latitude || !createAddressDto.longitude) {
+    if (createAddressDto.latitude == null || createAddressDto.longitude == null) {
       try {
         const fullAddress = `${createAddressDto.street}, ${createAddressDto.number}, ${createAddressDto.city}, ${createAddressDto.state}, ${createAddressDto.zipCode}`;
         const geocodeResult = await this.osmService.geocodeAddress(fullAddress);
