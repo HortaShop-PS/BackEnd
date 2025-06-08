@@ -14,6 +14,8 @@ import { OrdersModule } from './orders/orders.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { CheckoutModule } from './checkout/checkout.module';
 import { AddressesModule } from './addresses/addresses.module';
+import { DeliveryAuthModule } from './delivery-auth/delivery-auth.module';
+import { DeliveryOrdersModule } from './delivery-orders/delivery-orders.module';
 
 @Module({
   imports: [
@@ -46,7 +48,9 @@ import { AddressesModule } from './addresses/addresses.module';
     OrdersModule,
     ReviewsModule,
     CheckoutModule,
-    AddressesModule,
+    AddressesModule, // Adicionado da branch develop
+    DeliveryAuthModule, // Adicionado da branch feature/entregador
+    DeliveryOrdersModule, // Adicionado da branch feature/entregador
   ],
 })
 export class AppModule {}
