@@ -1,12 +1,39 @@
 import { Controller, Get, Query, Param, UseGuards, Body, Post, Request, UnauthorizedException, ParseUUIDPipe } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductResponseDto } from './dto/product-response.dto';
-import { CreateProductDto } from './dto/create-product.dto';
+import { CreateProductDto, CategoryEnum } from './dto/create-product.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('products')
 export class ProductController {
   constructor(private readonly service: ProductService) { }
+
+  @Get('categories')
+  async getCategories(): Promise<{ id: number; nome: string; categoria: string; icone: string }[]> {
+    const categories = Object.values(CategoryEnum).map((category, index) => {
+      const iconMap: { [key: string]: string } = {
+        'Vegetais': 'leaf-outline',
+        'Frutas': 'nutrition-outline', 
+        'Orgânicos': 'flower-outline',
+        'Laticínios': 'water-outline',
+        'Embutidos': 'basket-outline',
+        'Grãos': 'apps-outline',
+        'Temperos': 'leaf-outline',
+        'Bebidas': 'wine-outline',
+        'Doces': 'ice-cream-outline',
+        'Outros': 'ellipsis-horizontal-outline'
+      };
+
+      return {
+        id: index + 1,
+        nome: category,
+        categoria: category,
+        icone: iconMap[category] || 'ellipsis-horizontal-outline'
+      };
+    });
+
+    return categories;
+  }
 
   @Get('featured')
   async getFeatured(
