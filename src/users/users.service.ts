@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { CreateUserDto, UpdateUserDto, UpdatePasswordDto, UserResponseDto } from '../dto/user.dto';
+import { UpdateFcmTokenDto } from '../users/dto/update-fcm-token.dto';
 
 @Injectable()
 export class UsersService {
@@ -84,6 +85,16 @@ async findOne(id: number, relations: string[] = ['producer']): Promise<UserRespo
         relations: ['producer']
     });
 }
+
+  async updateFcmToken(id: number, updateFcmTokenDto: UpdateFcmTokenDto): Promise<UserResponseDto> {
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`Usuário com ID ${id} não encontrado`);
+    }
+    user.fcmToken = updateFcmTokenDto.fcmToken ?? null;
+    const updatedUser = await this.usersRepository.save(user);
+    return this.mapToDto(updatedUser);
+  }
 
   async create(userData: Partial<User>): Promise<User> {
     if (!userData.userType) {

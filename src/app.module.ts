@@ -16,6 +16,8 @@ import { CheckoutModule } from './checkout/checkout.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { DeliveryAuthModule } from './delivery-auth/delivery-auth.module';
 import { DeliveryOrdersModule } from './delivery-orders/delivery-orders.module';
+import { FirebaseModule } from './firebase/firebase.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -51,6 +53,8 @@ import { DeliveryOrdersModule } from './delivery-orders/delivery-orders.module';
     AddressesModule, // Adicionado da branch develop
     DeliveryAuthModule, // Adicionado da branch feature/entregador
     DeliveryOrdersModule, // Adicionado da branch feature/entregador
+    FirebaseModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}

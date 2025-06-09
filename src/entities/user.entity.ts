@@ -31,6 +31,9 @@ export class User {
   @Column({ type: 'varchar', default: 'consumer' })
   userType: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  fcmToken: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

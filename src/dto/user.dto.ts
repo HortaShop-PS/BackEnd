@@ -45,6 +45,7 @@ export class UserResponseDto {
   email: string;
   phone?: string;
   userType: string;
+  fcmToken?: string | null;
   producer?: {
       id?: number;
       farmName?: string;

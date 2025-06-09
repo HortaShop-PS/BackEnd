@@ -2,6 +2,7 @@ import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Request, 
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto, UpdatePasswordDto, UserResponseDto } from '../dto/user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UpdateFcmTokenDto } from './dto/update-fcm-token.dto';
 
 @Controller('users')
 export class UsersController {
@@ -53,6 +54,19 @@ export class UsersController {
     return this.usersService
       .updatePassword(+id, updatePasswordDto)
       .then(() => ({ message: 'Senha atualizada com sucesso' }));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id/fcm-token')
+  updateFcmToken(
+    @Param('id') id: string,
+    @Body() updateFcmTokenDto: UpdateFcmTokenDto,
+    @Request() req,
+  ): Promise<UserResponseDto> {
+    if (req.user.id !== +id) {
+      throw new UnauthorizedException('Você só pode atualizar seu próprio token FCM');
+    }
+    return this.usersService.updateFcmToken(+id, updateFcmTokenDto);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -10,6 +10,8 @@ import { User } from '../entities/user.entity';
 import { Producer } from '../entities/producer.entity';
 import { Review } from '../reviews/entities/review.entity';
 import { OrderDetailResponseDto, OrderItemResponseDto, OrderSummaryResponseDto } from './dto/order-response.dto';
+import { FirebaseService } from '../firebase/firebase.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class OrdersService {
@@ -27,6 +29,8 @@ export class OrdersService {
     @InjectRepository(Review)
     private readonly reviewRepository: Repository<Review>,
     private readonly eventEmitter: EventEmitter2,
+    private readonly firebaseService: FirebaseService,
+    private readonly usersService: UsersService,
   ) {}
 
   async createOrder(userId: number, createOrderDto: CreateOrderDto): Promise<Order> {
@@ -276,7 +280,20 @@ export class OrdersService {
     const previousStatus = order.status;
     order.status = status;
     const updatedOrder = await this.orderRepository.save(order);
-      // Se o pedido foi marcado como entregue, emitir evento para notificar sobre avaliações
+
+    // Send push notification
+    const user = await this.usersService.findOne(order.userId);
+    if (user && user.fcmToken) {
+      const title = `Atualização do Pedido #${order.id}`;
+      const body = `Seu pedido agora está com o status: ${status}.`;
+      const data = {
+        orderId: order.id,
+        status: status,
+      };
+      await this.firebaseService.sendPushNotification(user.fcmToken, title, body, data);
+    }
+
+    // Se o pedido foi marcado como entregue, emitir evento para notificar sobre avaliações
     if (status === OrderStatus.DELIVERED && previousStatus !== OrderStatus.DELIVERED) {
       this.eventEmitter.emit('order.delivered', {
         orderId: order.id,
