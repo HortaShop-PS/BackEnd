@@ -1,0 +1,41 @@
+import { Injectable, NestMiddleware, ForbiddenException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
+import { ProducerService } from '../producer.service';
+
+@Injectable()
+export class ProfileCompleteMiddleware implements NestMiddleware {
+  constructor(private readonly producersService: ProducerService) {}
+
+  async use(req: Request, res: Response, next: NextFunction) {
+    // Obtenha o ID do produtor da requisição (após autenticação)
+    const producerId = (req as any).user?.id || (req as any).user?.producerId || (req as any).user?.sub;
+
+    if (!producerId) {
+      // Se este middleware for aplicado a rotas que exigem autenticação,
+      // o AuthGuard já deveria ter bloqueado a requisição.
+      // Se chegou aqui sem producerId, pode ser um erro de configuração
+      // ou o middleware está aplicado a uma rota não autenticada indevidamente.
+      console.warn('ProfileCompleteMiddleware: Producer ID not found. Ensure AuthGuard runs before this middleware.');
+      throw new ForbiddenException('User authentication required to check profile completeness.');
+    }
+
+    try {
+      const profileStatus = await this.producersService.getProfileStatus(producerId);
+      if (!profileStatus.isComplete) {
+        throw new ForbiddenException(
+          `Producer profile is not complete. Missing fields: ${profileStatus.missingFields.join(', ')}. Please complete your profile. Completion: ${profileStatus.completionPercentage}%`
+        );
+      }
+      next(); // Perfil completo, continua para a próxima rota/handler
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new ForbiddenException('Producer profile not found. Cannot verify profile completeness.');
+      }
+      if (error instanceof ForbiddenException) {
+        throw error; // Re-lança a exceção já formatada
+      }
+      console.error('Error in ProfileCompleteMiddleware:', error);
+      throw new InternalServerErrorException('Failed to verify profile completeness due to an server error.');
+    }
+  }
+}
