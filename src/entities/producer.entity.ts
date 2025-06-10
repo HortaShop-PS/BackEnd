@@ -37,4 +37,6 @@ export class Producer {
 
   @OneToMany(() => Product, product => product.producer)
   products: Product[];
+  bankDetails: boolean;
+  businessDescription: boolean;
 }
