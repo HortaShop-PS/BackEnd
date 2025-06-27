@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -50,3 +51,61 @@ import { TrackingModule } from './tracking/tracking.module';
   ],
 })
 export class AppModule {}
+=======
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { UsersModule } from './users/users.module';
+import { ProductsModule } from 'src/products/product.module';
+import { AuthModule } from './auth/auth.module';
+import { ProducerModule } from './dto/producers/producer.module';
+import { FavoritesModule } from './favorites/favorites.module';
+import { UploadModule } from './upload/upload.module';
+import { CartModule } from './cart/cart.module';
+import { PaymentsModule } from './payments/payments.module';
+import { OrdersModule } from './orders/orders.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { CheckoutModule } from './checkout/checkout.module';
+import { AddressesModule } from './addresses/addresses.module';
+import { DeliveryAuthModule } from './delivery-auth/delivery-auth.module';
+import { DeliveryOrdersModule } from './delivery-orders/delivery-orders.module';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    EventEmitterModule.forRoot(),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'postgres',
+        host: config.get('DB_HOST'),
+        port: config.get<number>('DB_PORT'),
+        username: config.get('DB_USERNAME'),
+        password: config.get('DB_PASSWORD'),
+        database: config.get('DB_DATABASE'),
+        autoLoadEntities: true,
+        synchronize: true,
+        logging: true,
+        ssl: { rejectUnauthorized: false },
+      }),
+    }),
+    UsersModule,
+    ProductsModule,
+    AuthModule,
+    ProducerModule,
+    FavoritesModule,
+    UploadModule,
+    CartModule,
+    PaymentsModule,
+    OrdersModule,
+    ReviewsModule,
+    CheckoutModule,
+    AddressesModule, // Adicionado da branch develop
+    DeliveryAuthModule, // Adicionado da branch feature/entregador
+    DeliveryOrdersModule, // Adicionado da branch feature/entregador
+  ],
+})
+export class AppModule {}
+>>>>>>> ee49ba62f7e9e64816689563d9ec96dbcf1a63ec
