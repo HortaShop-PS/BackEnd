@@ -16,12 +16,12 @@ export class OrderItemResponseDto {
 
 export class OrderSummaryResponseDto {
   id: string;
-  status: OrderStatus;
+  status: string;
   totalPrice: number;
   createdAt: Date;
   updatedAt: Date;
   itemCount: number;
-  items?: OrderItemResponseDto[];
+  readyForPickup?: boolean; // ← ADICIONAR ESTA PROPRIEDADE
 }
 
 export class OrderDetailResponseDto {
