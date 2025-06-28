@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { AuthController } from '../auth/auth.controller';
 import { UsersModule } from '../users/users.module';
-import { DeliveryAuthModule } from '../delivery-auth/delivery-auth.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -13,7 +12,6 @@ import { GoogleStrategy } from '../auth/strategies/google.strategy';
 @Module({
   imports: [
     UsersModule,
-    DeliveryAuthModule,
     PassportModule, 
     ConfigModule,
     JwtModule.registerAsync({

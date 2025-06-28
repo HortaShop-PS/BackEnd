@@ -39,7 +39,7 @@ export class OpenStreetMapService {
         },
       });
 
-      const data: OSMGeocodeResponse[] = response.data;
+      const data = response.data as OSMGeocodeResponse[];
 
       if (data && data.length > 0) {
         const result = data[0];
@@ -82,7 +82,7 @@ export class OpenStreetMapService {
         },
       });
 
-      const data: OSMGeocodeResponse = response.data;
+      const data = response.data as OSMGeocodeResponse;
 
       if (data) {
         return {
@@ -121,7 +121,7 @@ export class OpenStreetMapService {
         },
       });
 
-      const data: OSMGeocodeResponse[] = response.data;
+      const data = response.data as OSMGeocodeResponse[];
 
       return data.map(item => ({
         display_name: item.display_name,
