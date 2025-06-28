@@ -3,9 +3,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { UsersModule } from './users/users.module';
-import { ProductsModule } from 'src/products/product.module';
+import { ProductsModule } from './products/product.module';
 import { AuthModule } from './auth/auth.module';
-import { ProducerModule } from './dto/producers/producer.module';
+import { ProducerModule } from './dto/producer/producer.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { UploadModule } from './upload/upload.module';
 import { CartModule } from './cart/cart.module';
@@ -13,9 +13,8 @@ import { PaymentsModule } from './payments/payments.module';
 import { OrdersModule } from './orders/orders.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { CheckoutModule } from './checkout/checkout.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { AddressesModule } from './addresses/addresses.module';
-import { DeliveryAuthModule } from './delivery-auth/delivery-auth.module';
-import { DeliveryOrdersModule } from './delivery-orders/delivery-orders.module';
 
 @Module({
   imports: [
@@ -48,9 +47,8 @@ import { DeliveryOrdersModule } from './delivery-orders/delivery-orders.module';
     OrdersModule,
     ReviewsModule,
     CheckoutModule,
-    AddressesModule, // Adicionado da branch develop
-    DeliveryAuthModule, // Adicionado da branch feature/entregador
-    DeliveryOrdersModule, // Adicionado da branch feature/entregador
+    NotificationsModule,
+    AddressesModule,
   ],
 })
 export class AppModule {}
