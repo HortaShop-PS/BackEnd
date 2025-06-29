@@ -49,8 +49,8 @@ import { AddressesModule } from './addresses/addresses.module';
     ReviewsModule,
     CheckoutModule,
     TrackingModule,
-    NotificationsModule,
-    AddressesModule,
+    NotificationsModule, 
+    AddressesModule, 
   ],
 })
 export class AppModule {}

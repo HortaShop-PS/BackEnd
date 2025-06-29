@@ -37,6 +37,15 @@ export class Producer {
 
   @OneToMany(() => Product, product => product.producer)
   products: Product[];
-  bankDetails: boolean;
-  businessDescription: boolean;
+
+  // Add missing properties for bankDetails and businessDescription
+  @Column({ type: 'json', nullable: true })
+  bankDetails: {
+    bankName: string;
+    agency: string;
+    accountNumber: string;
+  } | null;
+
+  @Column({ type: 'text', nullable: true })
+  businessDescription: string;
 }

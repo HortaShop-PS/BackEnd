@@ -3,22 +3,18 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../../users/users.service';
-import { DeliveryAuthService } from '../../delivery-auth/delivery-auth.service';
 import { UserResponseDto } from '../../dto/user.dto';
 
 interface JwtPayload {
   sub: number;
-  username?: string;
-  email?: string;
-  type?: 'user' | 'delivery';
+  username: string;
 }
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    configService: ConfigService,
+    private configService: ConfigService,
     private usersService: UsersService,
-    private deliveryAuthService: DeliveryAuthService,
   ) {
     const secret = configService.get<string>('JWT_SECRET');
     if (!secret) {
@@ -31,21 +27,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JwtPayload): Promise<UserResponseDto | any> {
-    // Se for um entregador
-    if (payload.type === 'delivery') {
-      const deliveryMan = await this.deliveryAuthService.validateDeliveryMan(payload.sub);
-      if (!deliveryMan) {
-        throw new UnauthorizedException('Entregador do token não encontrado');
-      }
-      return { ...deliveryMan, userType: 'delivery' };
-    }
-
-    // Se for um usuário normal
+  async validate(payload: JwtPayload): Promise<UserResponseDto> {
     const user = await this.usersService.findOne(payload.sub, ['producer']);
     if (!user) {
       throw new UnauthorizedException('Usuário do token não encontrado');
     }
-    return { ...user, userType: 'user' };
+    return user;
   }
 }
