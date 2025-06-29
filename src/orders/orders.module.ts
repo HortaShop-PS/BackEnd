@@ -9,10 +9,19 @@ import { Product } from '../products/product.entity';
 import { User } from '../entities/user.entity';
 import { Producer } from '../entities/producer.entity';
 import { Review } from '../reviews/entities/review.entity';
+import { OrderStatusHistory } from '../entities/order-status-history.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Order, OrderItem, Product, User, Producer, Review]),
+    TypeOrmModule.forFeature([
+      Order,
+      OrderItem,
+      Product,
+      User,
+      Producer,
+      Review,
+      OrderStatusHistory,
+    ]),
   ],
   controllers: [OrdersController, ProducerOrdersController],
   providers: [OrdersService],
