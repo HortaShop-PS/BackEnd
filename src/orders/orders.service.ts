@@ -10,6 +10,8 @@ import { User } from '../entities/user.entity';
 import { Producer } from '../entities/producer.entity';
 import { Review } from '../reviews/entities/review.entity';
 import { OrderDetailResponseDto, OrderItemResponseDto, OrderSummaryResponseDto } from './dto/order-response.dto';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../dto/notification.dto';
 
 @Injectable()
 export class OrdersService {
@@ -27,6 +29,7 @@ export class OrdersService {
     @InjectRepository(Review)
     private readonly reviewRepository: Repository<Review>,
     private readonly eventEmitter: EventEmitter2,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async createOrder(userId: number, createOrderDto: CreateOrderDto): Promise<Order> {
@@ -92,11 +95,13 @@ export class OrdersService {
       return order;
     });
   }
+
   async getOrdersByUserId(userId: number): Promise<OrderSummaryResponseDto[]> {
     const orders = await this.orderRepository.find({
       where: { userId },
       order: { createdAt: 'DESC' },
-      relations: ['items', 'items.product', 'items.producer', 'items.producer.user'],    });
+      relations: ['items', 'items.product', 'items.producer', 'items.producer.user'],
+    });
 
     return orders.map(order => ({
       id: order.id,
@@ -104,7 +109,8 @@ export class OrdersService {
       totalPrice: Number(order.totalPrice) || 0,
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
-      itemCount: order.items.length,      items: order.items.map(item => ({
+      itemCount: order.items.length,
+      items: order.items.map(item => ({
         id: item.id,
         productId: item.productId,
         productName: item.product?.name || 'Produto não encontrado',
@@ -142,7 +148,7 @@ export class OrdersService {
     }
 
     const orders = Array.from(orderMap.values());
-      return orders.map(order => ({
+    return orders.map(order => ({
       id: order.id,
       status: order.status,
       totalPrice: Number(order.totalPrice) || 0,
@@ -151,6 +157,7 @@ export class OrdersService {
       itemCount: order.items.length,
     }));
   }
+
   async getOrderById(orderId: string, userId?: number): Promise<OrderDetailResponseDto> {
     const order = await this.orderRepository.findOne({
       where: { id: orderId },
@@ -224,36 +231,27 @@ export class OrdersService {
       throw new NotFoundException(`Pedido com ID ${orderId} não contém itens do produtor ${producer.farmName}`);
     }
 
-    const itemsResponse: OrderItemResponseDto[] = await Promise.all(
-      order.items.map(async (item) => {
-        const review = await this.reviewRepository.findOne({
-          where: { 
-            orderItemId: item.id,
-            userId: order.userId // Review is associated with the customer (order.userId)
-          }
-        });
-        
-        return {
-          id: item.id,
-          productId: item.productId,
-          productName: item.product?.name || 'Produto não encontrado',
-          productImage: item.product?.imageUrl || '',
-          quantity: item.quantity,
-          unitPrice: Number(item.unitPrice) || 0,
-          totalPrice: Number(item.totalPrice) || 0,
-          producerId: item.producerId,
-          producerName: item.producer?.farmName || item.producer?.user?.name || 'Produtor',
-          notes: item.notes,
-          reviewed: !!review, // Producers just need to know if it's reviewed, not by whom
-        };
-      })
-    );
+    const itemsResponse: OrderItemResponseDto[] = order.items
+      .filter(item => item.producerId === producer.id)
+      .map(item => ({
+        id: item.id,
+        productId: item.productId,
+        productName: item.product?.name || 'Produto não encontrado',
+        productImage: item.product?.imageUrl || '',
+        quantity: item.quantity,
+        unitPrice: Number(item.unitPrice) || 0,
+        totalPrice: Number(item.totalPrice) || 0,
+        producerId: item.producerId,
+        producerName: item.producer?.farmName || item.producer?.user?.name || 'Produtor',
+        notes: item.notes,
+        reviewed: false,
+      }));
 
     return {
       id: order.id,
       userId: order.userId,
       status: order.status,
-      totalPrice: Number(order.totalPrice) || 0,
+      totalPrice: itemsResponse.reduce((sum, item) => sum + item.totalPrice, 0),
       shippingAddress: order.shippingAddress,
       paymentMethod: order.paymentMethod,
       trackingCode: order.trackingCode,
@@ -266,7 +264,7 @@ export class OrdersService {
   async updateOrderStatus(orderId: string, status: OrderStatus): Promise<Order> {
     const order = await this.orderRepository.findOne({
       where: { id: orderId },
-      relations: ['items', 'items.product']
+      relations: ['items', 'items.product', 'user']
     });
     
     if (!order) {
@@ -276,8 +274,81 @@ export class OrdersService {
     const previousStatus = order.status;
     order.status = status;
     const updatedOrder = await this.orderRepository.save(order);
-      // Se o pedido foi marcado como entregue, emitir evento para notificar sobre avaliações
+
+    // Se o pedido foi marcado como saiu para entrega (SHIPPED), enviar notificação push
+    if (status === OrderStatus.SHIPPED && previousStatus !== OrderStatus.SHIPPED) {
+      try {
+        // Criar notificação no banco de dados
+        await this.notificationsService.createNotification({
+          title: 'Pedido saiu para entrega! 🚚',
+          body: `Seu pedido #${orderId.substring(0, 8)} saiu para entrega e está a caminho. Acompanhe o status na aba de pedidos.`,
+          userId: order.userId,
+          type: NotificationType.ORDER_SHIPPED,
+          data: {
+            orderId: order.id,
+            trackingCode: order.trackingCode || `HRT${orderId.substring(0, 6).toUpperCase()}`,
+            status: 'shipped'
+          }
+        });
+
+        // Enviar notificação push via FCM
+        await this.notificationsService.sendPushToUser(order.userId, {
+          title: 'Pedido saiu para entrega! 🚚',
+          body: `Seu pedido #${orderId.substring(0, 8)} saiu para entrega e está a caminho.`,
+          data: {
+            type: 'order_shipped',
+            orderId: order.id,
+            trackingCode: order.trackingCode || `HRT${orderId.substring(0, 6).toUpperCase()}`,
+            status: 'shipped'
+          }
+        });
+
+        console.log(`✅ Notificação de SHIPPED enviada para usuário ${order.userId} - Pedido ${orderId}`);
+      } catch (error) {
+        console.error(`❌ Erro ao enviar notificação SHIPPED para pedido ${orderId}:`, error);
+        // Continua a execução mesmo se a notificação falhar
+      }
+    }
+
+    // Se o pedido foi marcado como entregue, emitir evento para notificar sobre avaliações
     if (status === OrderStatus.DELIVERED && previousStatus !== OrderStatus.DELIVERED) {
+      try {
+        // 🗑️ PRIMEIRO: Excluir notificações de "shipped" do banco de dados
+        await this.notificationsService.deleteNotificationsByOrderAndType(
+          order.id, 
+          NotificationType.ORDER_SHIPPED
+        );
+        console.log(`🗑️ Notificações de SHIPPED excluídas para o pedido ${orderId}`);
+
+        // Criar notificação no banco de dados
+        await this.notificationsService.createNotification({
+          title: 'Pedido entregue! ✅',
+          body: `Seu pedido #${orderId.substring(0, 8)} foi entregue com sucesso. Que tal avaliar os produtos?`,
+          userId: order.userId,
+          type: NotificationType.ORDER_DELIVERED,
+          data: {
+            orderId: order.id,
+            status: 'delivered'
+          }
+        });
+
+        // Enviar notificação push via FCM
+        await this.notificationsService.sendPushToUser(order.userId, {
+          title: 'Pedido entregue! ✅',
+          body: `Seu pedido #${orderId.substring(0, 8)} foi entregue com sucesso.`,
+          data: {
+            type: 'order_delivered',
+            orderId: order.id,
+            status: 'delivered'
+          }
+        });
+
+        console.log(`✅ Notificação de DELIVERED enviada para usuário ${order.userId} - Pedido ${orderId}`);
+      } catch (error) {
+        console.error(`❌ Erro ao processar notificações para pedido ${orderId}:`, error);
+      }
+
+      // Emitir evento para sistema de avaliações
       this.eventEmitter.emit('order.delivered', {
         orderId: order.id,
         userId: order.userId,

@@ -9,6 +9,17 @@ import { Response } from 'express';
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
+  // ✅ NOVO: Health check para upload
+  @Get('health')
+  getUploadHealth() {
+    return {
+      status: 'ok',
+      service: 'upload',
+      timestamp: new Date().toISOString(),
+      message: 'Upload service is running'
+    };
+  }
+
   @Post('image')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
@@ -64,6 +75,67 @@ export class UploadController {
     } catch (error) {
       console.error('Erro ao buscar imagem:', error);
       return res.status(500).send('Erro ao buscar imagem');
+    }
+  }
+
+  // ✅ ENDPOINT PARA UPLOAD DE FOTO DE PERFIL - MELHORADO
+  @Post('profile-image')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      fileFilter: (req, file, cb) => {
+        console.log('🔍 Verificando arquivo:', {
+          originalname: file.originalname,
+          mimetype: file.mimetype,
+          size: file.size
+        });
+        
+        if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
+          console.error('❌ Tipo de arquivo não permitido:', file.originalname);
+          return cb(new BadRequestException('Apenas arquivos de imagem são permitidos!'), false);
+        }
+        cb(null, true);
+      },
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB
+      },
+    }),
+  )
+  async uploadProfileImage(
+    @UploadedFile() file: Express.Multer.File,
+    @Request() req
+  ) {
+    console.log('📥 Recebendo upload de foto de perfil...');
+    console.log('👤 Usuário ID:', req.user?.id);
+    console.log('📄 Arquivo recebido:', file ? {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size
+    } : 'Nenhum arquivo');
+
+    if (!file) {
+      console.error('❌ Nenhum arquivo enviado');
+      throw new BadRequestException('Nenhum arquivo enviado');
+    }
+
+    try {
+      const userId = req.user.id;
+      console.log('🔄 Processando upload para usuário:', userId);
+      
+      // ✅ MELHORADO: Usar método aprimorado que lida com substituição
+      const imageUrl = await this.uploadService.uploadProfileImageWithReplacement(file, userId);
+      
+      console.log('✅ Upload concluído com sucesso:', imageUrl);
+      
+      return {
+        success: true,
+        imageUrl,
+        message: 'Imagem de perfil atualizada com sucesso'
+      };
+    } catch (error) {
+      console.error('❌ Erro ao fazer upload da imagem:', error);
+      throw new BadRequestException(error.message || 'Erro ao processar upload da imagem');
     }
   }
 }

@@ -15,6 +15,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { CheckoutModule } from './checkout/checkout.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AddressesModule } from './addresses/addresses.module';
+import { AppController } from './app.controller'; 
 
 @Module({
   imports: [
@@ -50,5 +51,6 @@ import { AddressesModule } from './addresses/addresses.module';
     NotificationsModule,
     AddressesModule,
   ],
+  controllers: [AppController], 
 })
 export class AppModule {}
