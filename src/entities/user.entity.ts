@@ -9,6 +9,9 @@ import {
 } from 'typeorm';
 import { Producer } from './producer.entity';
 import { Review } from '../reviews/entities/review.entity';
+import { Notification } from './notification.entity';
+import { DeviceToken } from './device-token.entity';
+import { Address } from '../addresses/entities/address.entity';
 
 @Entity('users')
 export class User {
@@ -41,4 +44,13 @@ export class User {
 
   @OneToMany(() => Review, review => review.user)
   reviews: Review[];
+
+  @OneToMany(() => Notification, notification => notification.user)
+  notifications: Notification[];
+
+  @OneToMany(() => DeviceToken, deviceToken => deviceToken.user)
+  deviceTokens: DeviceToken[];
+
+  @OneToMany(() => Address, address => address.user)
+  addresses: Address[];
 }
