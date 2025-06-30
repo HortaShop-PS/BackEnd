@@ -5,7 +5,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/product.module';
 import { AuthModule } from './auth/auth.module';
-import { ProducerModule } from './dto/producer/producer.module';
+import { ProducerModule } from './dto/producers/producer.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { UploadModule } from './upload/upload.module';
 import { CartModule } from './cart/cart.module';
