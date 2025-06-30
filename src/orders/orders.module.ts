@@ -9,10 +9,12 @@ import { Product } from '../products/product.entity';
 import { User } from '../entities/user.entity';
 import { Producer } from '../entities/producer.entity';
 import { Review } from '../reviews/entities/review.entity';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Order, OrderItem, Product, User, Producer, Review]),
+    NotificationsModule,
   ],
   controllers: [OrdersController, ProducerOrdersController],
   providers: [OrdersService],

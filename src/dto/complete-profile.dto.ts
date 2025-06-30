@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsObject, IsString, ValidateNested } from 'class-validator';
+import { IsNotEmpty, IsObject, IsString, ValidateNested, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class AddressDto {
@@ -39,14 +39,14 @@ export class BankDetailsDto {
 
 export class CompleteProfileDto {
   @IsString()
-  @IsNotEmpty()
-  cnpj: string;
+  @IsOptional() // CNPJ agora é opcional
+  cnpj?: string;
 
   @IsObject()
   @ValidateNested()
   @Type(() => AddressDto)
   @IsNotEmpty()
-  address: AddressDto;
+  address: AddressDto | string;
 
   @IsObject()
   @ValidateNested()
