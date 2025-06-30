@@ -33,6 +33,9 @@ export class User {
   @Column({ type: 'varchar', default: 'consumer' })
   userType: string;
 
+  @Column({ nullable: true }) 
+  profileImage?: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

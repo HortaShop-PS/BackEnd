@@ -5,7 +5,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/product.module';
 import { AuthModule } from './auth/auth.module';
-import { ProducerModule } from './dto/producer/producer.module';
+import { ProducerModule } from './dto/producers/producer.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { UploadModule } from './upload/upload.module';
 import { CartModule } from './cart/cart.module';
@@ -15,6 +15,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { CheckoutModule } from './checkout/checkout.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AddressesModule } from './addresses/addresses.module';
+import { AppController } from './app.controller'; 
 
 @Module({
   imports: [
@@ -50,5 +51,6 @@ import { AddressesModule } from './addresses/addresses.module';
     NotificationsModule,
     AddressesModule,
   ],
+  controllers: [AppController], 
 })
 export class AppModule {}

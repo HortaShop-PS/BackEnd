@@ -28,6 +28,10 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   phone?: string;
+
+  @IsOptional() 
+  @IsString()
+  profileImage?: string;
 }
 
 export class UpdatePasswordDto {
@@ -45,6 +49,7 @@ export class UserResponseDto {
   email: string;
   phone?: string;
   userType: string;
+  profileImage?: string; // ✅ Adicionar campo para foto de perfil
   producer?: {
       id?: number;
       farmName?: string;

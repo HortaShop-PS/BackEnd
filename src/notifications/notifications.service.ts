@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository, In, Like } from 'typeorm';
 import * as admin from 'firebase-admin';
 import { Notification } from '../entities/notification.entity';
 import { DeviceToken } from '../entities/device-token.entity';
 import { User } from '../entities/user.entity';
-import { CreateNotificationDto, RegisterDeviceTokenDto, SendPushNotificationDto } from '../dto/notification.dto';
+import { CreateNotificationDto, RegisterDeviceTokenDto, SendPushNotificationDto, NotificationType } from '../dto/notification.dto'; // ✅ Adicionar NotificationType aqui
 
 @Injectable()
 export class NotificationsService {
@@ -476,6 +476,70 @@ export class NotificationsService {
     } catch (error) {
       this.logger.error('Erro ao obter estatísticas de tokens:', error);
       return null;
+    }
+  }
+
+  async deleteNotificationsByOrderAndType(orderId: string, type: NotificationType): Promise<void> {
+    try {
+      // Buscar notificações que contenham o orderId nos dados e sejam do tipo especificado
+      const notifications = await this.notificationRepository.find({
+        where: {
+          type: type,
+        }
+      });
+
+      // Filtrar notificações que realmente correspondem ao orderId
+      const notificationsToDelete = notifications.filter(notification => {
+        try {
+          const data = typeof notification.data === 'string' 
+            ? JSON.parse(notification.data) 
+            : notification.data;
+          return data && data.orderId === orderId;
+        } catch {
+          return false;
+        }
+      });
+
+      if (notificationsToDelete.length > 0) {
+        const ids = notificationsToDelete.map(n => n.id);
+        const result = await this.notificationRepository.delete(ids);
+        this.logger.log(`🗑️ Excluídas ${result.affected} notificações do tipo ${type} para o pedido ${orderId}`);
+      } else {
+        this.logger.log(`ℹ️ Nenhuma notificação do tipo ${type} encontrada para o pedido ${orderId}`);
+      }
+    } catch (error) {
+      this.logger.error(`Erro ao excluir notificações do tipo ${type} para pedido ${orderId}:`, error);
+      throw error;
+    }
+  }
+
+  async deleteNotificationsByOrder(orderId: string): Promise<void> {
+    try {
+      // Buscar todas as notificações
+      const allNotifications = await this.notificationRepository.find();
+
+      // Filtrar notificações que correspondem ao orderId
+      const notificationsToDelete = allNotifications.filter(notification => {
+        try {
+          const data = typeof notification.data === 'string' 
+            ? JSON.parse(notification.data) 
+            : notification.data;
+          return data && data.orderId === orderId;
+        } catch {
+          return false;
+        }
+      });
+
+      if (notificationsToDelete.length > 0) {
+        const ids = notificationsToDelete.map(n => n.id);
+        const result = await this.notificationRepository.delete(ids);
+        this.logger.log(`🗑️ Excluídas ${result.affected} notificações para o pedido ${orderId}`);
+      } else {
+        this.logger.log(`ℹ️ Nenhuma notificação encontrada para o pedido ${orderId}`);
+      }
+    } catch (error) {
+      this.logger.error(`Erro ao excluir notificações para pedido ${orderId}:`, error);
+      throw error;
     }
   }
 }

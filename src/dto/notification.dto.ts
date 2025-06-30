@@ -2,6 +2,8 @@ import { IsString, IsOptional, IsBoolean, IsObject, IsEnum, IsNumber } from 'cla
 
 export enum NotificationType {
   ORDER = 'order',
+  ORDER_SHIPPED = 'order_shipped',
+  ORDER_DELIVERED = 'order_delivered',
   PRODUCT = 'product',
   PROMOTION = 'promotion',
   SYSTEM = 'system'
