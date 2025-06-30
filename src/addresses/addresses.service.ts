@@ -5,7 +5,7 @@ import { Address } from './entities/address.entity';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { AddressResponseDto } from './dto/address-response.dto';
-import { OpenStreetMapService } from './services/openstreetmap.service';
+import { GoogleMapsService } from './services/google-maps.service';
 import { User } from '../entities/user.entity';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class AddressesService {
     private readonly addressRepository: Repository<Address>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly osmService: OpenStreetMapService,
+    private readonly googleMapsService: GoogleMapsService,
   ) {}
 
   async create(createAddressDto: CreateAddressDto, userId: number): Promise<AddressResponseDto> {
@@ -27,10 +27,11 @@ export class AddressesService {
     let coordinates: { lat: number; lng: number } | null = null;
     let formattedAddress: string | null = null;
 
+    // Se latitude e longitude não foram fornecidas, geocodificar o endereço
     if (createAddressDto.latitude == null || createAddressDto.longitude == null) {
       try {
         const fullAddress = `${createAddressDto.street}, ${createAddressDto.number}, ${createAddressDto.city}, ${createAddressDto.state}, ${createAddressDto.zipCode}`;
-        const geocodeResult = await this.osmService.geocodeAddress(fullAddress);
+        const geocodeResult = await this.googleMapsService.geocodeAddress(fullAddress);
 
         if (geocodeResult.isValid) {
           coordinates = geocodeResult.coordinates;
@@ -52,7 +53,7 @@ export class AddressesService {
       latitude: coordinates?.lat || null,
       longitude: coordinates?.lng || null,
       formattedAddress: formattedAddress || null,
-    } as Partial<Address>); // ✅ CORREÇÃO AQUI
+    } as Partial<Address>);
 
     const savedAddress = await this.addressRepository.save(address);
     return this.mapToResponseDto(savedAddress);
@@ -98,17 +99,17 @@ export class AddressesService {
   }
 
   async validateAddress(address: string) {
-    return this.osmService.geocodeAddress(address);
+    return this.googleMapsService.geocodeAddress(address);
   }
 
   async autocomplete(input: string) {
-    return this.osmService.searchAddresses(input);
+    return this.googleMapsService.autocompleteAddress(input);
   }
 
   private mapToResponseDto(address: Address): AddressResponseDto {
     return {
       id: address.id,
-      userId: address.user?.id, // Relacionamento referenciado corretamente
+      userId: address.user?.id,
       street: address.street,
       number: address.number,
       complement: address.complement,
